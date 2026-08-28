@@ -103,8 +103,9 @@ export async function getUserProfile(
   const postsCount = postsCountRows[0]?.total ?? 0
   const isOwnProfile = viewerId === userId
   const isPublic = user.profilePublic
+  const isRegisteredViewer = Boolean(viewerId)
 
-  if (!isOwnProfile && !isPublic) {
+  if (!isOwnProfile && !isPublic && !isRegisteredViewer) {
     return {
       id: user.id,
       name: user.name,
@@ -144,7 +145,7 @@ export async function getUserProfile(
   }
 }
 
-export async function assertProfileAccessible(userId: string, viewerId: string) {
+export async function assertProfileAccessible(userId: string, viewerId?: string) {
   const db = useDb()
   const [user] = await db
     .select({
@@ -156,12 +157,33 @@ export async function assertProfileAccessible(userId: string, viewerId: string) 
     .where(eq(users.id, userId))
     .limit(1)
 
-  if (!user || !user.isActive) {
+  if (!user?.isActive) {
     throw createError({ statusCode: 404, statusMessage: 'Piloto no encontrado' })
   }
 
-  if (viewerId !== userId && !user.profilePublic) {
-    throw createError({ statusCode: 403, statusMessage: 'Este perfil es privado' })
+  if (viewerId !== userId && !user.profilePublic && !viewerId) {
+    throw createError({ statusCode: 403, statusMessage: 'Este perfil es solo para pilotos registrados' })
+  }
+}
+
+export async function assertPublicProfileAccessible(userId: string) {
+  const db = useDb()
+  const [user] = await db
+    .select({
+      id: users.id,
+      profilePublic: users.profilePublic,
+      isActive: users.isActive,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  if (!user?.isActive) {
+    throw createError({ statusCode: 404, statusMessage: 'Piloto no encontrado' })
+  }
+
+  if (!user.profilePublic) {
+    throw createError({ statusCode: 403, statusMessage: 'Este perfil es solo para pilotos registrados' })
   }
 }
 

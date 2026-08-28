@@ -1,9 +1,27 @@
 <script setup lang="ts">
 import type { ClubMemberPreview } from '~/types/profile'
 
-defineProps<{
-  member: ClubMemberPreview
-}>()
+const props = withDefaults(
+  defineProps<{
+    member: ClubMemberPreview
+    audience?: 'public' | 'members'
+  }>(),
+  {
+    audience: 'members',
+  },
+)
+
+const profileLink = computed(() => {
+  if (props.audience === 'members') {
+    return `/profile/${props.member.id}`
+  }
+
+  if (props.member.isPublic) {
+    return `/pilots/${props.member.id}`
+  }
+
+  return `/login?redirect=${encodeURIComponent(`/profile/${props.member.id}`)}`
+})
 
 function roleLabel(role: 'admin' | 'user') {
   return role === 'admin' ? 'Administrador' : 'Piloto'
@@ -12,7 +30,7 @@ function roleLabel(role: 'admin' | 'user') {
 
 <template>
   <NuxtLink
-    :to="`/profile/${member.id}`"
+    :to="profileLink"
     class="group relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-lowest/60 p-5 transition-all hover:border-primary/40 hover:shadow-[0_0_30px_rgba(255,71,156,0.12)]"
   >
     <div class="flex items-start gap-4">
@@ -52,7 +70,7 @@ function roleLabel(role: 'admin' | 'user') {
           :name="member.isPublic ? 'public' : 'lock'"
           class="text-sm"
         />
-        {{ member.isPublic ? 'Público' : 'Privado' }}
+        {{ member.isPublic ? 'Público' : 'Solo miembros' }}
       </span>
       <span class="rounded-full border border-outline-variant/30 bg-surface-container-high px-3 py-1 font-label-sm text-[10px] uppercase tracking-wider text-on-surface-variant">
         {{ member.postsCount }} publicaciones

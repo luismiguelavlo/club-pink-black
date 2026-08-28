@@ -12,7 +12,7 @@ const { data, pending, error } = await useFetch<{ members: ClubMemberPreview[] }
 
 const members = computed(() => data.value?.members ?? [])
 const publicCount = computed(() => members.value.filter((m) => m.isPublic).length)
-const privateCount = computed(() => members.value.filter((m) => !m.isPublic).length)
+const membersOnlyCount = computed(() => members.value.filter((m) => !m.isPublic).length)
 
 useSeoMeta({
   title: 'Miembros | Pink & Black',
@@ -32,7 +32,8 @@ useSeoMeta({
         MIEMBROS
       </h1>
       <p class="max-w-2xl font-body-md text-on-surface-variant">
-        Todos los pilotos registrados en el club. Toca un perfil para ver su información si es público.
+        Todos los pilotos registrados. Los perfiles públicos son visibles para cualquiera;
+        los de solo miembros requieren iniciar sesión.
       </p>
     </div>
 
@@ -47,7 +48,7 @@ useSeoMeta({
         {{ publicCount }} públicos
       </span>
       <span class="rounded-full border border-outline-variant/30 bg-surface-container-high px-4 py-2 font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
-        {{ privateCount }} privados
+        {{ membersOnlyCount }} solo miembros
       </span>
     </div>
 

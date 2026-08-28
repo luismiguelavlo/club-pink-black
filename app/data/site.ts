@@ -14,6 +14,7 @@ export const brandName = 'PINK & BLACK'
 
 export const navLinks: NavLink[] = [
   { label: 'Filosofía', href: '/#philosophy' },
+  { label: 'Miembros', href: '/#miembros' },
   { label: 'Galería', href: '/gallery' },
   { label: 'Labores sociales', href: '/labores-sociales' },
   { label: 'Rodadas', href: '/rodadas' },
@@ -34,7 +35,9 @@ export function getNavLinksForPath(path: string): NavLink[] {
       ? 'Labores sociales'
       : path.startsWith('/rodadas')
         ? 'Rodadas'
-        : 'Filosofía'
+        : path.startsWith('/pilots')
+          ? 'Miembros'
+          : 'Filosofía'
 
   return getNavLinks(activeLabel)
 }

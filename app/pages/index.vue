@@ -21,6 +21,7 @@ useSeoMeta({
   >
     <HeroSection />
     <StatsSection />
+    <MembersSection />
     <GallerySection />
     <SocialWorkSection />
     <ContactSection />

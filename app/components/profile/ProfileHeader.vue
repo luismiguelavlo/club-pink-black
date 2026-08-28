@@ -137,7 +137,7 @@ async function saveBio() {
               :name="profile.isPublic ? 'public' : 'lock'"
               class="text-sm"
             />
-            {{ profile.isPublic ? 'Perfil público' : 'Perfil privado' }}
+            {{ profile.isPublic ? 'Perfil público' : 'Solo miembros' }}
           </span>
           <span class="rounded-full border border-outline-variant/30 bg-surface-container-high px-4 py-2 font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
             Miembro desde {{ memberSinceLabel(profile.memberSince) }}
@@ -154,8 +154,8 @@ async function saveBio() {
           <p class="mb-4 font-body-md text-sm text-on-surface-variant">
             {{
               profile.isPublic
-                ? 'Otros pilotos pueden ver tu bio, galería y publicaciones.'
-                : 'Solo tú puedes ver tu bio, galería y publicaciones. Otros verán una pantalla de perfil privado.'
+                ? 'Cualquier visitante puede ver tu bio, galería y publicaciones desde la página principal.'
+                : 'Solo los pilotos registrados pueden ver tu bio, galería y publicaciones. Los visitantes sin cuenta no tendrán acceso.'
             }}
           </p>
           <div class="flex flex-wrap gap-3">
@@ -185,7 +185,7 @@ async function saveBio() {
               @click="emit('toggleVisibility', false)"
             >
               <MaterialIcon name="lock" />
-              Privado
+              Solo miembros
             </button>
           </div>
         </div>

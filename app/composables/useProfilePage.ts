@@ -160,7 +160,9 @@ export function useProfilePage(userId: Ref<string>) {
         },
       })
       await refreshProfile()
-      actionSuccess.value = isPublic ? 'Perfil configurado como público' : 'Perfil configurado como privado'
+      actionSuccess.value = isPublic
+        ? 'Perfil visible para todos los visitantes'
+        : 'Perfil visible solo para pilotos registrados'
     }
     catch (err: unknown) {
       const fetchError = err as { data?: { statusMessage?: string }; statusMessage?: string }

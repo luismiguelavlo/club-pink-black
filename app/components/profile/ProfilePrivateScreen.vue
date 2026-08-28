@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import type { UserProfile } from '~/types/profile'
 
-defineProps<{
-  profile: UserProfile
-}>()
+const props = withDefaults(
+  defineProps<{
+    profile: UserProfile
+    variant?: 'guest' | 'members'
+  }>(),
+  {
+    variant: 'members',
+  },
+)
+
+const loginRedirect = computed(() => `/login?redirect=${encodeURIComponent(`/profile/${props.profile.id}`)}`)
 </script>
 
 <template>
@@ -24,7 +32,7 @@ defineProps<{
           {{ profile.name }}
         </h2>
         <p class="font-label-sm text-label-sm uppercase tracking-[0.3em] text-primary">
-          Perfil privado
+          {{ variant === 'guest' ? 'Solo para miembros' : 'Perfil privado' }}
         </p>
       </div>
 
@@ -37,20 +45,39 @@ defineProps<{
 
       <div class="max-w-md space-y-2">
         <p class="font-body-md text-on-surface">
-          Este piloto ha configurado su perfil como privado.
+          {{
+            variant === 'guest'
+              ? 'Este piloto ha configurado su perfil como privado.'
+              : 'Este perfil no está disponible en esta vista.'
+          }}
         </p>
         <p class="font-body-md text-sm text-on-surface-variant">
-          Solo el dueño del perfil puede ver su bio, galería y publicaciones.
+          {{
+            variant === 'guest'
+              ? 'Inicia sesión como piloto registrado para ver su bio, galería y publicaciones.'
+              : 'Vuelve al directorio de miembros para explorar otros perfiles.'
+          }}
         </p>
       </div>
 
-      <NuxtLink
-        to="/members"
-        class="inline-flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-6 py-3 font-label-sm text-sm uppercase tracking-wider text-primary transition-colors hover:bg-primary/20"
-      >
-        <MaterialIcon name="groups" />
-        Volver a miembros
-      </NuxtLink>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <NuxtLink
+          v-if="variant === 'guest'"
+          :to="loginRedirect"
+          class="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-label-sm text-sm uppercase tracking-wider text-on-primary transition-colors hover:bg-primary/90"
+        >
+          <MaterialIcon name="login" />
+          Iniciar sesión
+        </NuxtLink>
+
+        <NuxtLink
+          :to="variant === 'guest' ? '/#miembros' : '/members'"
+          class="inline-flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-6 py-3 font-label-sm text-sm uppercase tracking-wider text-primary transition-colors hover:bg-primary/20"
+        >
+          <MaterialIcon name="groups" />
+          {{ variant === 'guest' ? 'Ver pilotos' : 'Volver a miembros' }}
+        </NuxtLink>
+      </div>
     </div>
   </section>
 </template>
