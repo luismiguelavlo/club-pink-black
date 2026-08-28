@@ -12,10 +12,6 @@ useSeoMeta({
   ogDescription:
     'La noche es nuestro territorio. Velocidad, hermandad y el rugir de los motores bajo la luz de neón.',
 })
-
-function onJoinSubmit(payload: { name: string; machine: string; email: string }) {
-  console.info('Join request:', payload)
-}
 </script>
 
 <template>
@@ -26,7 +22,8 @@ function onJoinSubmit(payload: { name: string; machine: string; email: string })
       <HeroSection />
       <StatsSection />
       <GallerySection />
-      <ContactSection @submit="onJoinSubmit" />
+      <SocialWorkSection />
+      <ContactSection />
     </main>
 
     <AppFooter :links="footerLinks" />

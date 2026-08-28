@@ -1,0 +1,68 @@
+export type MemberNavItem = {
+  label: string
+  href: string
+  icon: string
+  match: (path: string) => boolean
+}
+
+const memberNav: MemberNavItem[] = [
+  {
+    label: 'Feed social',
+    href: '/feed',
+    icon: 'forum',
+    match: (path) => path.startsWith('/feed'),
+  },
+  {
+    label: 'Rodadas',
+    href: '/rides',
+    icon: 'event',
+    match: (path) => path.startsWith('/rides'),
+  },
+]
+
+const adminNav: MemberNavItem[] = [
+  {
+    label: 'Crear rodada',
+    href: '/admin/rodadas',
+    icon: 'edit_calendar',
+    match: (path) => path.startsWith('/admin/rodadas'),
+  },
+  {
+    label: 'Pilotos e invitaciones',
+    href: '/admin/pilots',
+    icon: 'group_add',
+    match: (path) => path.startsWith('/admin/pilots'),
+  },
+  {
+    label: 'Multimedia',
+    href: '/admin/multimedia',
+    icon: 'gallery_thumbnail',
+    match: (path) => path.startsWith('/admin/multimedia'),
+  },
+  {
+    label: 'Labores sociales',
+    href: '/admin/labores-sociales',
+    icon: 'volunteer_activism',
+    match: (path) => path.startsWith('/admin/labores-sociales'),
+  },
+]
+
+const settingsNav: MemberNavItem = {
+  label: 'Ajustes',
+  href: '/settings',
+  icon: 'settings_input_component',
+  match: (path) => path.startsWith('/settings'),
+}
+
+/** Sidebar order: member links → admin links (if admin) → Ajustes always last. */
+export function getMemberSidebarNav(isAdmin: boolean): MemberNavItem[] {
+  const items = [...memberNav]
+
+  if (isAdmin) {
+    items.push(...adminNav)
+  }
+
+  items.push(settingsNav)
+
+  return items
+}

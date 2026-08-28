@@ -24,13 +24,13 @@ const emit = defineEmits<{
     <div class="relative z-10 flex h-full min-h-[420px] flex-col justify-end gap-6 p-8 md:max-w-2xl md:p-12">
       <div class="flex flex-wrap items-center gap-3">
         <span class="font-label-sm bg-primary px-3 py-1 text-[10px] uppercase tracking-widest text-on-primary">
-          Next Ride
+          Próxima rodada
         </span>
         <span
           v-if="event.spotsLeft !== undefined"
           class="font-label-sm text-label-sm text-secondary"
         >
-          {{ event.spotsLeft }} spots left
+          {{ event.spotsLeft }} cupos libres
         </span>
       </div>
 
@@ -66,7 +66,7 @@ const emit = defineEmits<{
           size="sm"
           @click="emit('rsvp', event.id)"
         >
-          Reserve Spot
+          Reservar cupo
         </AppButton>
       </div>
     </div>

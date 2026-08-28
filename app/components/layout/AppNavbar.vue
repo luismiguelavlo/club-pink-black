@@ -10,19 +10,25 @@ const props = withDefaults(
     ctaHref?: string
     ctaVariant?: 'primary' | 'primary-container'
     ctaShape?: 'rounded' | 'chamfer'
+    showLogin?: boolean
   }>(),
   {
     brand: brandName,
     links: () => [],
-    ctaLabel: 'Join the Family',
+    ctaLabel: 'Únete a la familia',
     ctaHref: '/#contact',
     ctaVariant: 'primary',
     ctaShape: 'rounded',
+    showLogin: true,
   },
 )
 
+const { loggedIn } = useUserSession()
 const isMenuOpen = ref(false)
 const route = useRoute()
+
+const loginHref = computed(() => (loggedIn.value ? '/feed' : '/login'))
+const loginLabel = computed(() => (loggedIn.value ? 'Mi área' : 'Iniciar sesión'))
 
 watch(
   () => props.links,
@@ -81,22 +87,30 @@ function isExternal(href: string) {
         </NuxtLink>
       </nav>
 
-      <AppButton
-        class="hidden md:inline-flex"
-        :href="ctaHref"
-        :variant="ctaVariant"
-        :shape="ctaShape"
-        size="sm"
-      >
-        {{ ctaLabel }}
-      </AppButton>
+      <div class="hidden items-center gap-4 md:flex">
+        <NuxtLink
+          v-if="showLogin"
+          :to="loginHref"
+          class="font-label-sm text-label-sm uppercase tracking-wider text-secondary transition-colors hover:text-primary"
+        >
+          {{ loginLabel }}
+        </NuxtLink>
+        <AppButton
+          :href="ctaHref"
+          :variant="ctaVariant"
+          :shape="ctaShape"
+          size="sm"
+        >
+          {{ ctaLabel }}
+        </AppButton>
+      </div>
 
       <button
         type="button"
         class="text-primary md:hidden"
         :aria-expanded="isMenuOpen"
         aria-controls="mobile-nav"
-        aria-label="Toggle navigation menu"
+        aria-label="Abrir o cerrar menú de navegación"
         @click="toggleMenu"
       >
         <MaterialIcon :name="isMenuOpen ? 'close' : 'menu'" />
@@ -118,6 +132,14 @@ function isExternal(href: string) {
           @click="closeMenu"
         >
           {{ link.label }}
+        </NuxtLink>
+        <NuxtLink
+          v-if="showLogin"
+          :to="loginHref"
+          class="font-label-sm text-label-sm uppercase tracking-wider text-secondary"
+          @click="closeMenu"
+        >
+          {{ loginLabel }}
         </NuxtLink>
         <AppButton
           :href="ctaHref"

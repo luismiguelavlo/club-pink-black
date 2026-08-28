@@ -15,21 +15,44 @@ withDefaults(
   },
 )
 
-const emit = defineEmits<{
-  submit: [payload: JoinFormPayload]
-}>()
-
 const form = reactive<JoinFormPayload>({
   name: '',
   machine: '',
   email: '',
 })
 
-function handleSubmit() {
-  emit('submit', { ...form })
-  form.name = ''
-  form.machine = ''
-  form.email = ''
+const loading = ref(false)
+const error = ref('')
+const success = ref('')
+
+async function handleSubmit() {
+  if (loading.value) return
+
+  loading.value = true
+  error.value = ''
+  success.value = ''
+
+  try {
+    const result = await $fetch<{ message: string }>('/api/public/contact', {
+      method: 'POST',
+      body: { ...form },
+    })
+
+    success.value = result.message
+    form.name = ''
+    form.machine = ''
+    form.email = ''
+  }
+  catch (err: unknown) {
+    const fetchError = err as { data?: { statusMessage?: string }; statusMessage?: string }
+    error.value =
+      fetchError.data?.statusMessage
+      ?? fetchError.statusMessage
+      ?? 'No se pudo enviar la solicitud'
+  }
+  finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -54,14 +77,14 @@ function handleSubmit() {
           <FloatingLabelInput
             id="name"
             v-model="form.name"
-            label="PILOT NAME"
+            label="NOMBRE DEL PILOTO"
             autocomplete="name"
             required
           />
           <FloatingLabelInput
             id="machine"
             v-model="form.machine"
-            label="YOUR MACHINE (MODEL)"
+            label="TU MÁQUINA (MODELO)"
             required
           />
         </div>
@@ -70,18 +93,32 @@ function handleSubmit() {
           id="email"
           v-model="form.email"
           type="email"
-          label="COMMS CHANNEL (EMAIL)"
+          label="CANAL DE CONTACTO (EMAIL)"
           autocomplete="email"
           required
         />
+
+        <p
+          v-if="error"
+          class="font-body-md text-sm text-error"
+        >
+          {{ error }}
+        </p>
+        <p
+          v-if="success"
+          class="font-body-md text-sm text-primary"
+        >
+          {{ success }}
+        </p>
 
         <div class="pt-6">
           <AppButton
             type="submit"
             block
             size="lg"
+            :disabled="loading"
           >
-            {{ submitLabel }}
+            {{ loading ? 'Enviando…' : submitLabel }}
           </AppButton>
         </div>
       </form>

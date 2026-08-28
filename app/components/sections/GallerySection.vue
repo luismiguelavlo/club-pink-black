@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { GalleryItem } from '~/types/site'
-import { galleryItems } from '~/data/site'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title?: string
     viewAllLabel?: string
@@ -13,9 +12,19 @@ withDefaults(
     title: 'Nuestra Huella',
     viewAllLabel: 'Ver Todo',
     viewAllHref: '/gallery',
-    items: () => galleryItems,
+    items: undefined,
   },
 )
+
+const { data, pending, error } = await useAsyncData(
+  'public-gallery-preview',
+  () => $fetch<{ items: GalleryItem[] }>('/api/public/gallery', { query: { limit: 4 } }),
+  {
+    immediate: props.items === undefined,
+  },
+)
+
+const resolvedItems = computed(() => props.items ?? data.value?.items ?? [])
 </script>
 
 <template>
@@ -40,9 +49,33 @@ withDefaults(
         </NuxtLink>
       </div>
 
-      <div class="grid auto-rows-[250px] grid-cols-1 gap-4 md:grid-cols-12">
+      <p
+        v-if="pending && resolvedItems.length === 0"
+        class="font-body-md py-12 text-center text-secondary"
+      >
+        Cargando archivo visual…
+      </p>
+
+      <p
+        v-else-if="error"
+        class="font-body-md py-12 text-center text-secondary"
+      >
+        No se pudo cargar la galería.
+      </p>
+
+      <p
+        v-else-if="resolvedItems.length === 0"
+        class="font-body-md py-12 text-center text-secondary"
+      >
+        Pronto subiremos las primeras capturas del club.
+      </p>
+
+      <div
+        v-else
+        class="grid auto-rows-[250px] grid-cols-1 gap-4 md:grid-cols-12"
+      >
         <GalleryCard
-          v-for="item in items"
+          v-for="item in resolvedItems"
           :key="item.id"
           :item="item"
         />

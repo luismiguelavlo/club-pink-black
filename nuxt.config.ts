@@ -3,13 +3,24 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxtjs/tailwindcss', 'nuxt-auth-utils'],
 
   css: ['~/assets/css/main.css'],
 
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
     configPath: 'tailwind.config',
+  },
+
+  runtimeConfig: {
+    // Overridable with NUXT_DATABASE_URL
+    databaseUrl: '',
+    cloudinaryCloudName: '',
+    cloudinaryApiKey: '',
+    cloudinaryApiSecret: '',
+    session: {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    },
   },
 
   components: [
@@ -19,10 +30,15 @@ export default defineNuxtConfig({
     },
   ],
 
+  routeRules: {
+    '/events': { redirect: { to: '/rodadas', statusCode: 301 } },
+    '/admin/events': { redirect: { to: '/admin/rodadas', statusCode: 301 } },
+  },
+
   app: {
     head: {
       htmlAttrs: {
-        lang: 'en',
+        lang: 'es',
         class: 'dark',
       },
       title: 'Pink & Black Road Rider Club',

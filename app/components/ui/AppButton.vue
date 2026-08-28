@@ -9,6 +9,7 @@ const props = withDefaults(
     type?: 'button' | 'submit' | 'reset'
     href?: string
     block?: boolean
+    disabled?: boolean
     ariaLabel?: string
   }>(),
   {
@@ -17,6 +18,7 @@ const props = withDefaults(
     shape: 'rounded',
     type: 'button',
     block: false,
+    disabled: false,
   },
 )
 
@@ -48,6 +50,7 @@ const classes = computed(() => [
   sizeClasses[props.size],
   shapeClasses[props.shape],
   props.block ? 'w-full tracking-widest' : '',
+  props.disabled ? 'pointer-events-none opacity-50' : '',
 ])
 </script>
 
@@ -57,6 +60,7 @@ const classes = computed(() => [
     :to="href"
     :class="classes"
     :aria-label="ariaLabel"
+    :aria-disabled="disabled || undefined"
   >
     <slot />
   </NuxtLink>
@@ -65,6 +69,7 @@ const classes = computed(() => [
     :type="type"
     :class="classes"
     :aria-label="ariaLabel"
+    :disabled="disabled"
   >
     <slot />
   </button>

@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { ClubEvent, EventFilter } from '~/types/site'
-import { clubEvents } from '~/data/site'
 
 const props = withDefaults(
   defineProps<{
     items?: ClubEvent[]
     filter?: EventFilter
+    pending?: boolean
   }>(),
   {
-    items: () => clubEvents,
+    items: () => [],
     filter: 'all',
+    pending: false,
   },
 )
 
@@ -70,26 +71,35 @@ const showFeatured = computed(() => {
 
 <template>
   <section class="mb-section-gap px-gutter-desktop">
-    <FeaturedEventCard
-      v-if="showFeatured && featuredEvent"
-      :event="featuredEvent"
-      @rsvp="emit('rsvp', $event)"
-    />
-
-    <div class="space-y-4">
-      <EventCard
-        v-for="event in filteredEvents"
-        :key="event.id"
-        :event="event"
-        @rsvp="emit('rsvp', $event)"
-      />
-    </div>
-
     <p
-      v-if="!showFeatured && filteredEvents.length === 0"
+      v-if="pending"
       class="font-body-md py-16 text-center text-secondary"
     >
-      No hay eventos en este filtro. Prueba otra categoría.
+      Cargando calendario…
     </p>
+
+    <template v-else>
+      <FeaturedEventCard
+        v-if="showFeatured && featuredEvent"
+        :event="featuredEvent"
+        @rsvp="emit('rsvp', $event)"
+      />
+
+      <div class="space-y-4">
+        <EventCard
+          v-for="event in filteredEvents"
+          :key="event.id"
+          :event="event"
+          @rsvp="emit('rsvp', $event)"
+        />
+      </div>
+
+      <p
+        v-if="!showFeatured && filteredEvents.length === 0"
+        class="font-body-md py-16 text-center text-secondary"
+      >
+        No hay rodadas en este filtro. Prueba otra categoría.
+      </p>
+    </template>
   </section>
 </template>

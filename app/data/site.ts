@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ArchiveMediaItem,
   ClubEvent,
   FooterLink,
@@ -13,9 +13,10 @@ import type {
 export const brandName = 'PINK & BLACK'
 
 export const navLinks: NavLink[] = [
-  { label: 'Philosophy', href: '/#philosophy' },
-  { label: 'Gallery', href: '/gallery' },
-  { label: 'Events', href: '/events' },
+  { label: 'Filosofía', href: '/#philosophy' },
+  { label: 'Galería', href: '/gallery' },
+  { label: 'Labores sociales', href: '/labores-sociales' },
+  { label: 'Rodadas', href: '/rodadas' },
 ]
 
 export function getNavLinks(activeLabel?: string): NavLink[] {
@@ -27,12 +28,13 @@ export function getNavLinks(activeLabel?: string): NavLink[] {
 
 /** Active nav link according to the current route. */
 export function getNavLinksForPath(path: string): NavLink[] {
-  const activeLabel =
-    path.startsWith('/gallery')
-      ? 'Gallery'
-      : path.startsWith('/events')
-        ? 'Events'
-        : 'Philosophy'
+  const activeLabel = path.startsWith('/gallery')
+    ? 'Galería'
+    : path.startsWith('/labores-sociales')
+      ? 'Labores sociales'
+      : path.startsWith('/rodadas')
+        ? 'Rodadas'
+        : 'Filosofía'
 
   return getNavLinks(activeLabel)
 }
@@ -58,15 +60,15 @@ export const clubLogo = {
 export const clubStats: StatItem[] = [
   { value: '+150', label: 'Miembros', align: 'right' },
   { value: '85', label: 'Rodadas Nocturnas', align: 'right' },
-  { value: '40', label: 'Eventos Realizados', align: 'left' },
+  { value: '40', label: 'Rodadas realizadas', align: 'left' },
   { value: '+50,000', label: 'KM Recorridos', align: 'left' },
 ]
 
 export const galleryItems: GalleryItem[] = [
   {
     id: 'midnight-canyons',
-    title: 'Midnight Canyons',
-    badge: 'LATEST RUN',
+    title: 'Cañones de medianoche',
+    badge: 'ÚLTIMA RODADA',
     span: 'wide',
     imageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuDVuHht3FM-7knNpUBHtTp4mmBW58NAuL4EKRaPPWFkXbaGcBht3quzAK8Ohhy5TI_OW9Ydj_x2sYTymdI-YrKeeLjECQD1s8jhFtwRpH-k-xmHJYtZRf7ddj54UqamO058UwFxZSGWAHNVl_rep1iTzctu7h8nJpB3J_u6O-I2AcijOkjELYlVLrU4dTaY0uL0ZMgGwRG3VNZuE3NQ5-L9fwbyvUU3ro3wIqNHuQHIpHRKYvSRuAJbTw',
@@ -75,8 +77,8 @@ export const galleryItems: GalleryItem[] = [
   },
   {
     id: 'city-meetup',
-    title: 'City Meetup',
-    subtitle: 'Urban Sector',
+    title: 'Meetup urbano',
+    subtitle: 'Sector urbano',
     span: 'narrow',
     imageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuCTN8SGq-EMzbAN5Yyq7tYsICKIZ6qs5MBEsnS6UM4AdQP2hZ64oJ6SVZMvZyphm_ylDdHEVjdZ61p5QZFdv9lERzVpD1tvPDBOpIxCXaMDyUf5g6nb3okhUKV0NPqH2XaQEWswaataWEq5cro6Gmbc7S71m8E-rULEI_YVMKoWvgAUguDFuIbid3sabVZMp_hoEY3FAGugzTBU1CMP1o0aU_bxpF8HHVlvcoG8pVBYiRGns7O4lRBUdQ',
@@ -85,8 +87,8 @@ export const galleryItems: GalleryItem[] = [
   },
   {
     id: 'garage-night',
-    title: 'Garage Night',
-    subtitle: 'Headquarters',
+    title: 'Noche de garage',
+    subtitle: 'Sede central',
     span: 'narrow',
     imageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAzVGrAreJVi7igXtbojQ-p6iJQGT-SX1riU_swgjLdMRDqP4paf8fkavb7makrGcZi7MRqRXmWjyvJ_c5p2LZik740TESI3HcLineiVwyVuqWNgUh0wQe_OeuiS8EWmeVN70kUufSa8rfDmMnfOCCQ9zToYF4ePMFNw-yrfO_kCt5gh3d7ze7wbWvYJzEaGAGm3513lM_2RFZY6q6ZIsWQPMmGoLVmyxy_z0i7JbMaymlpM1J1tG-pIw',
@@ -95,7 +97,7 @@ export const galleryItems: GalleryItem[] = [
   },
   {
     id: 'neon-vista',
-    title: 'Neon Vista Run',
+    title: 'Rodada Neon Vista',
     span: 'wide',
     imageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuBoNcJTgTbox97U89q_iToxZJwpPEE0ESd8iXSBwP5a_P6LKcgmhFMYMx10kmnRLpfXtEVmXMPqXBRcJerMuM7JS6OPi7UljiKJYQslmQQkEqSN8wHGe9XRnX9VnFb7KHt6Zy6paPEaFNfHz9QlBjCLfhplUAQ2YOOj7zqwvkfkR-hbZ41o2G9RaIEp6HTGPB_iGWZbRsZfEwLLe-6gGpZEZ1om4z4Hv_h4zXHhIlSBMQHj2tFDzcm4lQ',
@@ -111,8 +113,8 @@ export const archiveHero = {
 } as const
 
 export const archiveFilters: { id: GalleryFilter; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'photo', label: 'Photos' },
+  { id: 'all', label: 'Todos' },
+  { id: 'photo', label: 'Fotos' },
   { id: 'video', label: 'Videos' },
 ]
 
@@ -121,18 +123,18 @@ export const archiveMediaItems: ArchiveMediaItem[] = [
     id: 'twilight-convoy',
     kind: 'photo',
     size: 'large',
-    title: 'Twilight Convoy',
-    badge: 'Featured Ride',
+    title: 'Convoy del crepúsculo',
+    badge: 'Rodada destacada',
     imageUrl:
       'https://lh3.googleusercontent.com/aida/AP1WRLtxlLVaIKJVS7yxd3QyX5IOBDgC_vMHkNblls4tXvNNl_xJAUpss0GrEvC8RvYlsWIfQ9K4iC3eQiXSHoOYKBHruLdUVlxFVfpVNWJs3toiQgPQ5-azKGMnxv9fiZ7nJZDbClYShToCrJMJQsSvvOD8HVSa7tvpUUCrivRyGqwIbFb3SW_mHn59LMlo9zhH1fW7trWz4kagX6LW8Z0Du1df9OAyKOSIKpF0QYWAXBtfWvmGRjw0mQqVx21F',
-    imageAlt: 'Convoy de motos al atardecer — featured ride del club',
+    imageAlt: 'Convoy de motos al atardecer — rodada destacada del club',
   },
   {
     id: 'raw-engine',
     kind: 'video',
     size: 'tall',
     duration: '02:45',
-    videoLabel: 'RAW ENGINE SOUND',
+    videoLabel: 'SONIDO DE MOTOR',
     imageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAdaz2xv-uV7WXbAyJcH_l7t8hsq2l9h71CGBQq6MRhO80IRTNsSVcuyH-wiaL7sENIQdMhz-potvKVYSJCjcTcq1975W0ZObw9i4WUdYs8Cds8OFKfFIGIhfCtHEcDEnjUpIbh8-uAuwsao3oDEnMV0zBg5NvlZVl0ephPGQXLhPZg9z_1pUk9PAh60p6LuHygZUDm9Edn7oPZrxCEDdrXo7OTGwTw4g1hE1zXVifIqxnCIacNtQJz8A',
     imageAlt:
@@ -193,22 +195,22 @@ export const eventsHero = {
 } as const
 
 export const eventFilters: FilterOption<EventFilter>[] = [
-  { id: 'all', label: 'All' },
-  { id: 'upcoming', label: 'Upcoming' },
-  { id: 'night-run', label: 'Night Runs' },
+  { id: 'all', label: 'Todos' },
+  { id: 'upcoming', label: 'Próximos' },
+  { id: 'night-run', label: 'Rodadas nocturnas' },
   { id: 'meetup', label: 'Meetups' },
-  { id: 'past', label: 'Past' },
+  { id: 'past', label: 'Pasados' },
 ]
 
 export const clubEvents: ClubEvent[] = [
   {
     id: 'midnight-canyons-run',
-    title: 'Midnight Canyons',
+    title: 'Cañones de medianoche',
     description:
       'Rodada nocturna por cañones iluminados. Convoy cerrado, ritmo técnico y hermandad bajo neón.',
     dateLabel: '26 JUL',
     timeLabel: '22:00',
-    location: 'Canyons Gate — Sector Norte',
+    location: 'Entrada de cañones — Sector Norte',
     status: 'upcoming',
     category: 'night-run',
     featured: true,
@@ -219,12 +221,12 @@ export const clubEvents: ClubEvent[] = [
   },
   {
     id: 'city-meetup-july',
-    title: 'City Meetup',
+    title: 'Meetup urbano',
     description:
       'Encuentro urbano para nuevos riders. Briefing rápido, foto de pack y salida corta por el centro.',
     dateLabel: '02 AUG',
     timeLabel: '21:30',
-    location: 'Urban Sector — Neon Diner',
+    location: 'Sector urbano — Diner Neón',
     status: 'upcoming',
     category: 'meetup',
     spotsLeft: 32,
@@ -234,12 +236,12 @@ export const clubEvents: ClubEvent[] = [
   },
   {
     id: 'garage-night-aug',
-    title: 'Garage Night',
+    title: 'Noche de garage',
     description:
       'Sesión de mantenimiento, swaps y música. Trae tu máquina; la familia trae las herramientas.',
     dateLabel: '09 AUG',
     timeLabel: '20:00',
-    location: 'HQ Garage — Headquarters',
+    location: 'Garage HQ — Sede',
     status: 'upcoming',
     category: 'garage',
     spotsLeft: 40,
@@ -249,12 +251,12 @@ export const clubEvents: ClubEvent[] = [
   },
   {
     id: 'neon-vista-live',
-    title: 'Neon Vista Run',
+    title: 'Rodada Neon Vista',
     description:
       'Convoy en vivo rumbo al mirador. Última llamada para unirte al pack.',
     dateLabel: 'HOY',
     timeLabel: '23:15',
-    location: 'Vista Ridge — Overlook',
+    location: 'Cresta Vista — Mirador',
     status: 'live',
     category: 'night-run',
     spotsLeft: 6,
@@ -264,12 +266,12 @@ export const clubEvents: ClubEvent[] = [
   },
   {
     id: 'twilight-convoy-past',
-    title: 'Twilight Convoy',
+    title: 'Convoy del crepúsculo',
     description:
       'Salida archivada. Un convoy al atardecer que marcó el ritmo de la temporada.',
     dateLabel: '12 JUL',
     timeLabel: '19:45',
-    location: 'West Loop — Start Line',
+    location: 'Bucle oeste — Línea de salida',
     status: 'past',
     category: 'tour',
     imageUrl:
@@ -278,12 +280,12 @@ export const clubEvents: ClubEvent[] = [
   },
   {
     id: 'base-open-house',
-    title: 'Base Open House',
+    title: 'Jornada de puertas abiertas',
     description:
       'Puertas abiertas en headquarters. Conoce al club, las máquinas y el código de la carretera.',
     dateLabel: '28 JUN',
     timeLabel: '18:00',
-    location: 'HQ — Glass Pavilion',
+    location: 'HQ — Pabellón de cristal',
     status: 'past',
     category: 'meetup',
     imageUrl:
@@ -293,15 +295,15 @@ export const clubEvents: ClubEvent[] = [
 ]
 
 export const contactContent = {
-  title: 'Join the Revolution',
+  title: 'Únete a la revolución',
   subtitle: 'Deja tu marca en el asfalto. Únete a la familia.',
-  submitLabel: 'Ignite',
+  submitLabel: 'Enviar',
 } as const
 
 export const footerLinks: FooterLink[] = [
-  { label: 'Contact Us', href: '/#contact' },
-  { label: 'Privacy Policy', href: '#' },
-  { label: 'Terms of Ride', href: '#' },
+  { label: 'Contacto', href: '/#contact' },
+  { label: 'Privacidad', href: '#' },
+  { label: 'Términos', href: '#' },
 ]
 
 export const footerTagline =

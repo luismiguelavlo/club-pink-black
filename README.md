@@ -1,75 +1,55 @@
-# Nuxt Minimal Starter
+# Pink & Black Road Rider Club
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Sitio Nuxt 4 del club con autenticación por sesión, invitaciones, feed, multimedia y eventos.
 
-## Setup
+## Stack
 
-Make sure to install dependencies:
+- Nuxt 4 + Vue 3 + Tailwind
+- PostgreSQL 16 (Docker)
+- Drizzle ORM
+- [nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils) (sesiones seguras, gratis)
+
+## Setup rápido
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
+cp .env.example .env
+npm run db:setup
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+### Credenciales semilla
 
-Build the application for production:
+| Rol    | Correo           | Contraseña |
+|--------|------------------|------------|
+| Admin  | admin@club.com   | Admin123!  |
+| Usuario| rider@club.com   | Rider123!  |
+
+## Auth e invitaciones
+
+- **Inicio de sesión** en `/login` — sin registro público
+- **Feed social** en `/feed` — admins y usuarios (posts + comentarios)
+- **Rodadas y eventos** en `/rides` — todos ven; solo admin crea en `/admin/events`
+- **Pilotos e invitaciones** en `/admin/pilots` — solo `admin`
+- **Multimedia** en `/admin/multimedia` — fotos (Cloudinary) + videos (YouTube)
+- Los admins generan invitaciones (código + link, 24h)
+- El invitado crea su cuenta en `/invite/:code`
+
+### Cloudinary
+
+En `.env`:
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+NUXT_CLOUDINARY_CLOUD_NAME=...
+NUXT_CLOUDINARY_API_KEY=...
+NUXT_CLOUDINARY_API_SECRET=...
 ```
 
-Locally preview production build:
+### Scripts DB
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+npm run db:up
+npm run db:push
+npm run db:seed
+npm run db:setup
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

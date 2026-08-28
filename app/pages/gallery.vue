@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type { GalleryFilter } from '~/types/site'
 import { footerLinks, getNavLinksForPath } from '~/data/site'
 
@@ -6,19 +6,15 @@ const route = useRoute()
 const links = computed(() => getNavLinksForPath(route.path))
 
 useSeoMeta({
-  title: 'Gallery | PINK & BLACK ROAD RIDER CLUB',
+  title: 'Galería | PINK & BLACK ROAD RIDER CLUB',
   description:
-    'Archivo visual del Pink & Black Road Rider Club: adrenalina, neón y hermandad en la carretera.',
-  ogTitle: 'Gallery | PINK & BLACK ROAD RIDER CLUB',
+    'Archivo visual del Pink & Black Road Rider Club: adrenalina, neon y hermandad en la carretera.',
+  ogTitle: 'Galería | PINK & BLACK ROAD RIDER CLUB',
   ogDescription:
     'Capturando la adrenalina de la carretera y la hermandad que define al club.',
 })
 
 const activeFilter = ref<GalleryFilter>('all')
-
-function onLoadMore() {
-  console.info('Load more archive media')
-}
 </script>
 
 <template>
@@ -32,10 +28,7 @@ function onLoadMore() {
     <main class="pt-32">
       <ArchiveHero />
       <ArchiveFilterBar v-model="activeFilter" />
-      <ArchiveMasonryGrid
-        :filter="activeFilter"
-        @load-more="onLoadMore"
-      />
+      <ArchiveMasonryGrid :filter="activeFilter" />
     </main>
 
     <AppFooter

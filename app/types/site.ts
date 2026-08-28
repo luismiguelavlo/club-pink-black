@@ -76,6 +76,14 @@ export type JoinFormPayload = {
   email: string
 }
 
-export type ButtonVariant = 'primary' | 'primary-container' | 'outline' | 'ghost'
+export type SocialWorkPreview = {
+  id: string
+  title: string
+  description: string
+  coverImageUrl: string | null
+  imageCount: number
+  videoCount: number
+  publishedAt: string | null
+}
 export type ButtonSize = 'sm' | 'md' | 'lg'
 export type ButtonShape = 'rounded' | 'chamfer' | 'pill'

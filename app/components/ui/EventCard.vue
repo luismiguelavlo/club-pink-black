@@ -10,9 +10,9 @@ const emit = defineEmits<{
 }>()
 
 const statusLabel: Record<EventStatus, string> = {
-  upcoming: 'Upcoming',
-  live: 'Live Now',
-  past: 'Completed',
+  upcoming: 'Próximo',
+  live: 'En vivo',
+  past: 'Finalizado',
 }
 
 const statusClass: Record<EventStatus, string> = {
@@ -75,7 +75,7 @@ const statusClass: Record<EventStatus, string> = {
             name="group"
             class="text-sm text-primary"
           />
-          {{ event.spotsLeft }} spots
+          {{ event.spotsLeft }} cupos
         </span>
       </div>
     </div>
@@ -86,7 +86,7 @@ const statusClass: Record<EventStatus, string> = {
         size="sm"
         @click="emit('rsvp', event.id)"
       >
-        {{ event.status === 'live' ? 'Join Now' : 'RSVP' }}
+        {{ event.status === 'live' ? 'Unirme' : 'Reservar' }}
       </AppButton>
       <AppButton
         v-else
