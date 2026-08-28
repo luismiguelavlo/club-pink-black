@@ -38,10 +38,10 @@ export function getPlayerLimits(gameType: PartyRoomState['gameType']) {
   }
 }
 
-export function addPlayerToRoom(
+export async function addPlayerToRoom(
   room: PartyRoomState,
   user: { id: string; name: string; avatarUrl: string | null },
-): PartyRoomState {
+): Promise<PartyRoomState> {
   if (room.status !== 'lobby') {
     throw createError({ statusCode: 400, statusMessage: 'La partida ya comenzó' })
   }
@@ -71,11 +71,11 @@ export function addPlayerToRoom(
     color,
   })
 
-  saveRoom(room)
+  await saveRoom(room)
   return room
 }
 
-export function removePlayerFromRoom(room: PartyRoomState, userId: string): PartyRoomState | null {
+export async function removePlayerFromRoom(room: PartyRoomState, userId: string): Promise<PartyRoomState | null> {
   room.players = room.players.filter((p) => p.userId !== userId)
 
   if (room.players.length === 0) {
@@ -95,7 +95,7 @@ export function removePlayerFromRoom(room: PartyRoomState, userId: string): Part
     handlePlayerDisconnect(room, userId)
   }
 
-  saveRoom(room)
+  await saveRoom(room)
   return room
 }
 
@@ -109,7 +109,7 @@ function handlePlayerDisconnect(room: PartyRoomState, userId: string) {
   }
 }
 
-export function startGame(room: PartyRoomState, userId: string): PartyRoomState {
+export async function startGame(room: PartyRoomState, userId: string): Promise<PartyRoomState> {
   if (room.hostUserId !== userId) {
     throw createError({ statusCode: 403, statusMessage: 'Solo el anfitrión puede iniciar' })
   }
@@ -137,7 +137,7 @@ export function startGame(room: PartyRoomState, userId: string): PartyRoomState 
       break
   }
 
-  saveRoom(room)
+  await saveRoom(room)
   return room
 }
 
@@ -240,7 +240,7 @@ function generatePlatforms() {
   return platforms
 }
 
-export function tickRoom(room: PartyRoomState, now = Date.now()): PartyRoomState {
+export async function tickRoom(room: PartyRoomState, now = Date.now()): Promise<PartyRoomState> {
   const delta = Math.min(now - room.lastTickAt, 100)
   room.lastTickAt = now
 
@@ -251,7 +251,6 @@ export function tickRoom(room: PartyRoomState, now = Date.now()): PartyRoomState
   if (room.gameType === 'bomba' && room.phase === 'bomba_exploded') {
     if (room.phaseEndsAt && now >= room.phaseEndsAt) {
       startBombaRound(room)
-      saveRoom(room)
     }
   }
 
@@ -264,7 +263,7 @@ export function tickRoom(room: PartyRoomState, now = Date.now()): PartyRoomState
   }
 
   room.updatedAt = now
-  saveRoom(room)
+  await saveRoom(room)
   return room
 }
 
@@ -412,12 +411,12 @@ function simulateNoPisoPhysics(room: PartyRoomState, delta: number) {
   }
 }
 
-export function handleAction(
+export async function handleAction(
   room: PartyRoomState,
   userId: string,
   action: PartyGameAction,
-): PartyRoomState {
-  tickRoom(room)
+): Promise<PartyRoomState> {
+  await tickRoom(room)
 
   switch (room.gameType) {
     case 'infiltrado':
@@ -431,7 +430,7 @@ export function handleAction(
       break
   }
 
-  saveRoom(room)
+  await saveRoom(room)
   return room
 }
 

@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const room = getRoom(code)
+  const room = await getRoom(code)
 
   if (!room) {
     throw createError({ statusCode: 404, statusMessage: 'Sala no encontrada' })
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, statusMessage: 'No estás en esta sala' })
   }
 
-  handleAction(room, session.user.id, parsed.data)
+  await handleAction(room, session.user.id, parsed.data)
 
   return {
     room: toRoomView(room, session.user.id),

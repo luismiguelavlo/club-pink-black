@@ -9,16 +9,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Código requerido' })
   }
 
-  const room = getRoom(code)
+  const room = await getRoom(code)
 
   if (!room) {
     return { ok: true }
   }
 
-  const updated = removePlayerFromRoom(room, session.user.id)
+  const updated = await removePlayerFromRoom(room, session.user.id)
 
   if (!updated) {
-    deleteRoom(code)
+    await deleteRoom(code)
   }
 
   return { ok: true }

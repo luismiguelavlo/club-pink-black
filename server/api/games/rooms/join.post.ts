@@ -1,5 +1,5 @@
 import { joinPartyRoomSchema } from '../../../utils/party-games/validation'
-import { getRoom, saveRoom } from '../../../utils/party-games/store'
+import { getRoom } from '../../../utils/party-games/store'
 import { addPlayerToRoom, getPlayerLimits } from '../../../utils/party-games/engine'
 
 export default defineEventHandler(async (event) => {
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const code = parsed.data.code.toUpperCase()
-  const room = getRoom(code)
+  const room = await getRoom(code)
 
   if (!room) {
     throw createError({ statusCode: 404, statusMessage: 'Sala no encontrada' })
@@ -25,13 +25,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Este código es de otro juego' })
   }
 
-  addPlayerToRoom(room, {
+  await addPlayerToRoom(room, {
     id: session.user.id,
     name: session.user.name,
     avatarUrl: session.user.avatarUrl ?? null,
   })
-
-  saveRoom(room)
 
   const limits = getPlayerLimits(room.gameType)
 

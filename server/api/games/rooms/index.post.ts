@@ -1,5 +1,5 @@
 import { createPartyRoomSchema } from '../../../utils/party-games/validation'
-import { createRoomCode, newRoomBase, saveRoom } from '../../../utils/party-games/store'
+import { createRoom } from '../../../utils/party-games/store'
 import { getPlayerLimits } from '../../../utils/party-games/engine'
 
 export default defineEventHandler(async (event) => {
@@ -14,16 +14,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const code = createRoomCode()
-  const room = newRoomBase({
-    code,
+  const room = await createRoom({
     gameType: parsed.data.gameType,
     hostUserId: session.user.id,
     hostName: session.user.name,
     hostAvatarUrl: session.user.avatarUrl ?? null,
   })
-
-  saveRoom(room)
 
   const limits = getPlayerLimits(room.gameType)
 

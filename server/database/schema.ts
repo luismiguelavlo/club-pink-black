@@ -1,4 +1,5 @@
-import { boolean, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import { boolean, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import type { PartyRoomState } from '../../shared/types/party-games'
 
 export const userRoleEnum = pgEnum('user_role', ['admin', 'user'])
 export const inviteStatusEnum = pgEnum('invite_status', ['pending', 'accepted', 'revoked', 'expired'])
@@ -391,3 +392,18 @@ export type NewMaintenanceReminder = typeof maintenanceReminders.$inferInsert
 export type VehicleDocument = typeof vehicleDocuments.$inferSelect
 export type NewVehicleDocument = typeof vehicleDocuments.$inferInsert
 export type VehicleDocumentKind = 'soat' | 'tecnomecanica' | 'taxes' | 'insurance' | 'license' | 'other'
+
+export const partyGameTypeEnum = pgEnum('party_game_type', ['infiltrado', 'bomba', 'no-piso'])
+
+export const partyRooms = pgTable('party_rooms', {
+  code: text('code').primaryKey(),
+  gameType: partyGameTypeEnum('game_type').notNull(),
+  hostUserId: uuid('host_user_id').notNull(),
+  state: jsonb('state').$type<PartyRoomState>().notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export type PartyRoomRow = typeof partyRooms.$inferSelect
+export type NewPartyRoomRow = typeof partyRooms.$inferInsert
