@@ -18,7 +18,7 @@ withDefaults(
 const form = reactive<JoinFormPayload>({
   name: '',
   machine: '',
-  email: '',
+  whatsapp: '',
 })
 
 const loading = ref(false)
@@ -41,7 +41,7 @@ async function handleSubmit() {
     success.value = result.message
     form.name = ''
     form.machine = ''
-    form.email = ''
+    form.whatsapp = ''
   }
   catch (err: unknown) {
     const fetchError = err as { data?: { statusMessage?: string }; statusMessage?: string }
@@ -90,11 +90,11 @@ async function handleSubmit() {
         </div>
 
         <FloatingLabelInput
-          id="email"
-          v-model="form.email"
-          type="email"
-          label="CANAL DE CONTACTO (EMAIL)"
-          autocomplete="email"
+          id="whatsapp"
+          v-model="form.whatsapp"
+          type="tel"
+          label="WHATSAPP"
+          autocomplete="tel"
           required
         />
 

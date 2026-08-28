@@ -265,7 +265,7 @@ export async function listPublicMarketingEvents(): Promise<MarketingEvent[]> {
 
 export async function createContactRequest(input: {
   name: string
-  email: string
+  whatsapp: string
   machine: string
 }) {
   const db = useDb()
@@ -273,12 +273,28 @@ export async function createContactRequest(input: {
     .insert(contactRequests)
     .values({
       name: input.name,
-      email: input.email,
+      whatsapp: input.whatsapp,
       machine: input.machine,
     })
     .returning()
 
   return row
+}
+
+export async function listContactRequests() {
+  const db = useDb()
+  const rows = await db
+    .select()
+    .from(contactRequests)
+    .orderBy(desc(contactRequests.createdAt))
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    whatsapp: row.whatsapp,
+    machine: row.machine,
+    createdAt: row.createdAt.toISOString(),
+  }))
 }
 
 export async function createEventRsvp(

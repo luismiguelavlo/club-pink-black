@@ -46,6 +46,12 @@ const adminNav: MemberNavItem[] = [
     match: (path) => path.startsWith('/admin/pilots'),
   },
   {
+    label: 'Solicitudes',
+    href: '/admin/solicitudes',
+    icon: 'inbox',
+    match: (path) => path.startsWith('/admin/solicitudes'),
+  },
+  {
     label: 'Multimedia',
     href: '/admin/multimedia',
     icon: 'gallery_thumbnail',

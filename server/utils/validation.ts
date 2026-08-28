@@ -54,7 +54,14 @@ export const updateEventSchema = createEventSchema
 
 export const contactRequestSchema = z.object({
   name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(120),
-  email: z.string().email('Email inválido').transform((value) => value.toLowerCase().trim()),
+  whatsapp: z
+    .string()
+    .trim()
+    .min(8, 'El número debe tener al menos 8 dígitos')
+    .max(20, 'Número demasiado largo')
+    .regex(/^[\d+\s\-()]+$/, 'Solo números y caracteres de teléfono')
+    .transform((value) => value.replace(/\D/g, ''))
+    .refine((digits) => digits.length >= 8, 'Número de WhatsApp inválido'),
   machine: z.string().trim().min(2, 'Indica tu máquina').max(120),
 })
 

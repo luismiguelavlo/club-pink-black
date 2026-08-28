@@ -142,7 +142,7 @@ export const clubEvents = pgTable('club_events', {
 export const contactRequests = pgTable('contact_requests', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
-  email: text('email').notNull(),
+  whatsapp: text('whatsapp').notNull(),
   machine: text('machine').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })

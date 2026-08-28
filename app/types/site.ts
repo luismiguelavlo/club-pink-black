@@ -73,7 +73,7 @@ export type FooterLink = {
 export type JoinFormPayload = {
   name: string
   machine: string
-  email: string
+  whatsapp: string
 }
 
 export type SocialWorkPreview = {
