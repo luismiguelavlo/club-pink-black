@@ -29,10 +29,38 @@ export const acceptInviteSchema = z.object({
     .transform((value) => (value ? value : undefined)),
 })
 
-export const createYoutubeMediaSchema = z.object({
-  title: z.string().trim().min(2, 'El título debe tener al menos 2 caracteres').max(160),
-  youtubeUrl: z.string().url('URL inválida').min(10),
-})
+export const externalVideoUrlSchema = z
+  .string()
+  .trim()
+  .url('URL inválida')
+  .min(10)
+  .refine(
+    (value) => {
+      const lower = value.toLowerCase()
+      return (
+        lower.includes('youtube.com')
+        || lower.includes('youtu.be')
+        || lower.includes('tiktok.com')
+        || lower.includes('vm.tiktok.com')
+      )
+    },
+    { message: 'Solo se aceptan enlaces de YouTube o TikTok' },
+  )
+
+export const createYoutubeMediaSchema = z
+  .object({
+    title: z.string().trim().min(2, 'El título debe tener al menos 2 caracteres').max(160),
+    videoUrl: externalVideoUrlSchema.optional(),
+    youtubeUrl: externalVideoUrlSchema.optional(),
+  })
+  .refine((value) => Boolean(value.videoUrl || value.youtubeUrl), {
+    message: 'La URL del video es requerida',
+    path: ['videoUrl'],
+  })
+  .transform((value) => ({
+    title: value.title,
+    videoUrl: (value.videoUrl ?? value.youtubeUrl)!,
+  }))
 
 export const updateMediaSchema = z.object({
   title: z.string().trim().min(2, 'El título debe tener al menos 2 caracteres').max(160),
@@ -110,13 +138,23 @@ export const createSocialWorkSchema = z.object({
 
 export const updateSocialWorkSchema = createSocialWorkSchema
 
-export const addSocialWorkVideoSchema = z.object({
-  youtubeUrl: z.string().url('URL inválida').min(10),
-  title: z
-    .union([z.literal(''), z.string().trim().max(160)])
-    .optional()
-    .transform((value) => (value ? value : undefined)),
-})
+export const addSocialWorkVideoSchema = z
+  .object({
+    videoUrl: externalVideoUrlSchema.optional(),
+    youtubeUrl: externalVideoUrlSchema.optional(),
+    title: z
+      .union([z.literal(''), z.string().trim().max(160)])
+      .optional()
+      .transform((value) => (value ? value : undefined)),
+  })
+  .refine((value) => Boolean(value.videoUrl || value.youtubeUrl), {
+    message: 'La URL del video es requerida',
+    path: ['videoUrl'],
+  })
+  .transform((value) => ({
+    videoUrl: (value.videoUrl ?? value.youtubeUrl)!,
+    title: value.title,
+  }))
 
 export const createPostSchema = z.object({
   body: z.string().trim().min(1, 'La descripción es requerida').max(2000, 'La descripción es demasiado larga'),

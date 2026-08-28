@@ -2,6 +2,7 @@
   "name": "pink-land",
   "type": "module",
   "private": true,
+  "packageManager": "npm@11.7.0",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",

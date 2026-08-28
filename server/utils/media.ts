@@ -1,7 +1,12 @@
 import { and, desc, eq, sql } from 'drizzle-orm'
-import { mediaItems, type MediaItem, type MediaKind } from '../database/schema'
+import { mediaItems, type MediaItem, type MediaKind, type VideoProvider } from '../database/schema'
 import { useDb } from './db'
 import { deleteCloudinaryImage, uploadImageToCloudinary } from './cloudinary'
+import {
+  parseExternalVideoUrl,
+  resolveVideoThumbnail,
+  youtubeThumbnail,
+} from './external-video'
 
 export type PublicMediaItem = {
   id: string
@@ -12,28 +17,22 @@ export type PublicMediaItem = {
   bytes: number | null
   youtubeUrl: string | null
   youtubeId: string | null
+  videoProvider: VideoProvider | null
   thumbnailUrl: string | null
   previewUrl: string
   createdAt: string
   updatedAt: string
 }
 
-const YOUTUBE_REGEX =
-  /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
-
-export function extractYoutubeId(url: string): string | null {
-  const match = url.trim().match(YOUTUBE_REGEX)
-  return match?.[1] ?? null
-}
-
-export function youtubeThumbnail(youtubeId: string) {
-  return `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
-}
-
 function toPublicMedia(item: MediaItem): PublicMediaItem {
+  const provider = item.videoProvider ?? 'youtube'
   const previewUrl =
     item.kind === 'video'
-      ? (item.thumbnailUrl ?? (item.youtubeId ? youtubeThumbnail(item.youtubeId) : ''))
+      ? resolveVideoThumbnail(
+          provider,
+          item.youtubeId ?? '',
+          item.thumbnailUrl,
+        )
       : (item.imageUrl ?? '')
 
   return {
@@ -45,6 +44,7 @@ function toPublicMedia(item: MediaItem): PublicMediaItem {
     bytes: item.bytes,
     youtubeUrl: item.youtubeUrl,
     youtubeId: item.youtubeId,
+    videoProvider: item.videoProvider,
     thumbnailUrl: item.thumbnailUrl,
     previewUrl,
     createdAt: item.createdAt.toISOString(),
@@ -137,16 +137,9 @@ export async function createPhotoMedia(input: {
 export async function createYoutubeMedia(input: {
   createdById: string
   title: string
-  youtubeUrl: string
+  videoUrl: string
 }) {
-  const youtubeId = extractYoutubeId(input.youtubeUrl)
-
-  if (!youtubeId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'URL de YouTube inválida',
-    })
-  }
+  const parsed = await parseExternalVideoUrl(input.videoUrl)
 
   const db = useDb()
   const [created] = await db
@@ -154,9 +147,10 @@ export async function createYoutubeMedia(input: {
     .values({
       kind: 'video',
       title: input.title.trim(),
-      youtubeUrl: input.youtubeUrl.trim(),
-      youtubeId,
-      thumbnailUrl: youtubeThumbnail(youtubeId),
+      youtubeUrl: parsed.videoUrl,
+      youtubeId: parsed.videoId,
+      videoProvider: parsed.provider,
+      thumbnailUrl: parsed.thumbnailUrl || null,
       createdById: input.createdById,
     })
     .returning()

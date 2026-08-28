@@ -10,7 +10,7 @@ import {
   type MediaKind,
 } from '../database/schema'
 import { useDb } from './db'
-import { youtubeThumbnail } from './media'
+import { resolveVideoThumbnail } from './external-video'
 
 export type MarketingEventStatus = 'upcoming' | 'live' | 'past'
 export type MarketingEventCategory = 'night-run' | 'meetup' | 'garage' | 'tour'
@@ -110,7 +110,11 @@ function formatTimeLabel(date: Date) {
 
 function mediaPreviewUrl(item: MediaItem) {
   if (item.kind === 'video') {
-    return item.thumbnailUrl ?? (item.youtubeId ? youtubeThumbnail(item.youtubeId) : '')
+    const provider = item.videoProvider ?? 'youtube'
+    if (item.youtubeId) {
+      return resolveVideoThumbnail(provider, item.youtubeId, item.thumbnailUrl)
+    }
+    return item.thumbnailUrl ?? ''
   }
   return item.imageUrl ?? ''
 }

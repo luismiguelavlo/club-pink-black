@@ -7,6 +7,12 @@ export type MemberNavItem = {
 
 const memberNav: MemberNavItem[] = [
   {
+    label: 'Juegos',
+    href: '/games',
+    icon: 'videogame_asset',
+    match: (path) => path.startsWith('/games'),
+  },
+  {
     label: 'Feed social',
     href: '/feed',
     icon: 'forum',

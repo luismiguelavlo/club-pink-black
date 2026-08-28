@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const item = await createYoutubeMedia({
     createdById: session.user.id,
     title: parsed.data.title,
-    youtubeUrl: parsed.data.youtubeUrl,
+    videoUrl: parsed.data.videoUrl,
   })
 
   return { item }

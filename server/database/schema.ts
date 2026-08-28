@@ -3,6 +3,7 @@ import { boolean, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid }
 export const userRoleEnum = pgEnum('user_role', ['admin', 'user'])
 export const inviteStatusEnum = pgEnum('invite_status', ['pending', 'accepted', 'revoked', 'expired'])
 export const mediaKindEnum = pgEnum('media_kind', ['photo', 'video'])
+export const videoProviderEnum = pgEnum('video_provider', ['youtube', 'tiktok'])
 export const notificationTypeEnum = pgEnum('notification_type', [
   'comment',
   'ignite',
@@ -63,6 +64,7 @@ export const mediaItems = pgTable('media_items', {
   bytes: integer('bytes'),
   youtubeUrl: text('youtube_url'),
   youtubeId: text('youtube_id'),
+  videoProvider: videoProviderEnum('video_provider').default('youtube'),
   thumbnailUrl: text('thumbnail_url'),
   createdById: uuid('created_by_id')
     .notNull()
@@ -211,6 +213,7 @@ export const socialWorkVideos = pgTable('social_work_videos', {
     .references(() => socialWorkPosts.id, { onDelete: 'cascade' }),
   youtubeUrl: text('youtube_url').notNull(),
   youtubeId: text('youtube_id').notNull(),
+  videoProvider: videoProviderEnum('video_provider').notNull().default('youtube'),
   thumbnailUrl: text('thumbnail_url'),
   title: text('title'),
   sortOrder: integer('sort_order').notNull().default(0),
@@ -225,6 +228,7 @@ export type Invite = typeof invites.$inferSelect
 export type InviteStatus = 'pending' | 'accepted' | 'revoked' | 'expired'
 export type MediaItem = typeof mediaItems.$inferSelect
 export type MediaKind = 'photo' | 'video'
+export type VideoProvider = 'youtube' | 'tiktok'
 export type Post = typeof posts.$inferSelect
 export type PostImage = typeof postImages.$inferSelect
 export type Comment = typeof comments.$inferSelect

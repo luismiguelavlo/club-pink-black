@@ -8,7 +8,7 @@ import {
 } from '../database/schema'
 import { useDb } from './db'
 import { deleteCloudinaryImage, isCloudinaryConfigured, uploadImageToCloudinary } from './cloudinary'
-import { extractYoutubeId, youtubeThumbnail } from './media'
+import { parseExternalVideoUrl, resolveVideoThumbnail } from './external-video'
 
 export type SocialWorkImageDto = {
   id: string
@@ -20,6 +20,7 @@ export type SocialWorkVideoDto = {
   id: string
   youtubeUrl: string
   youtubeId: string
+  videoProvider: 'youtube' | 'tiktok'
   thumbnailUrl: string
   title: string | null
   sortOrder: number
@@ -69,11 +70,13 @@ function toImageDto(row: typeof socialWorkImages.$inferSelect): SocialWorkImageD
 }
 
 function toVideoDto(row: typeof socialWorkVideos.$inferSelect): SocialWorkVideoDto {
+  const provider = row.videoProvider ?? 'youtube'
   return {
     id: row.id,
     youtubeUrl: row.youtubeUrl,
     youtubeId: row.youtubeId,
-    thumbnailUrl: row.thumbnailUrl ?? youtubeThumbnail(row.youtubeId),
+    videoProvider: provider,
+    thumbnailUrl: resolveVideoThumbnail(provider, row.youtubeId, row.thumbnailUrl),
     title: row.title,
     sortOrder: row.sortOrder,
   }
@@ -438,17 +441,14 @@ export async function deleteSocialWorkImage(postId: string, imageId: string): Pr
 
 export async function addSocialWorkVideo(
   postId: string,
-  input: { youtubeUrl: string; title?: string },
+  input: { videoUrl: string; title?: string },
 ): Promise<SocialWorkPostDto> {
   const post = await getPostById(postId)
   if (!post) {
     throw createError({ statusCode: 404, statusMessage: 'Labor social no encontrada' })
   }
 
-  const youtubeId = extractYoutubeId(input.youtubeUrl)
-  if (!youtubeId) {
-    throw createError({ statusCode: 400, statusMessage: 'URL de YouTube inválida' })
-  }
+  const parsed = await parseExternalVideoUrl(input.videoUrl)
 
   const db = useDb()
   const [currentCount] = await db
@@ -465,9 +465,10 @@ export async function addSocialWorkVideo(
 
   await db.insert(socialWorkVideos).values({
     postId,
-    youtubeUrl: input.youtubeUrl.trim(),
-    youtubeId,
-    thumbnailUrl: youtubeThumbnail(youtubeId),
+    youtubeUrl: parsed.videoUrl,
+    youtubeId: parsed.videoId,
+    videoProvider: parsed.provider,
+    thumbnailUrl: parsed.thumbnailUrl || null,
     title: input.title?.trim() || null,
     sortOrder: currentCount?.total ?? 0,
   })

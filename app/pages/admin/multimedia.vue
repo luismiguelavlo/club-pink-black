@@ -1,4 +1,6 @@
 ﻿<script setup lang="ts">
+import { videoProviderLabel } from '~/utils/external-video'
+
 type MediaKind = 'photo' | 'video'
 
 type MediaItem = {
@@ -9,6 +11,7 @@ type MediaItem = {
   bytes: number | null
   youtubeUrl: string | null
   youtubeId: string | null
+  videoProvider: 'youtube' | 'tiktok' | null
   thumbnailUrl: string | null
   previewUrl: string
   createdAt: string
@@ -119,7 +122,7 @@ async function uploadFiles(files: File[]) {
   )
 
   if (!images.length) {
-    actionError.value = 'Solo se aceptan imágenes JPG, PNG o WEBP. Los videos van por link de YouTube.'
+    actionError.value = 'Solo se aceptan imágenes JPG, PNG o WEBP. Los videos van por link de YouTube o TikTok.'
     return
   }
 
@@ -255,7 +258,7 @@ async function removeItem(item: MediaItem) {
             Arrastra o sube contenido
           </h2>
           <p class="mb-8 max-w-xl text-center font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">
-            Fotos: JPG / PNG / WEBP vía Cloudinary · Videos: link de YouTube
+            Fotos: JPG / PNG / WEBP vía Cloudinary · Videos: YouTube o TikTok
           </p>
 
           <div class="flex flex-wrap items-center justify-center gap-3">
@@ -407,7 +410,7 @@ async function removeItem(item: MediaItem) {
                     {{ formatBytes(item.bytes ?? 0) }}
                   </template>
                   <template v-else>
-                    YouTube
+                    {{ videoProviderLabel(item.videoProvider ?? 'youtube') }}
                   </template>
                 </p>
               </div>

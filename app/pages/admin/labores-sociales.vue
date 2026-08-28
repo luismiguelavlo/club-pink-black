@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { videoProviderLabel } from '~/utils/external-video'
+
 type SocialWorkStatus = 'draft' | 'published'
 
 type SocialWorkImage = {
@@ -11,6 +13,7 @@ type SocialWorkVideo = {
   id: string
   youtubeUrl: string
   youtubeId: string
+  videoProvider: 'youtube' | 'tiktok'
   thumbnailUrl: string
   title: string | null
   sortOrder: number
@@ -40,8 +43,8 @@ const router = useRouter()
 const title = ref('')
 const description = ref('')
 const status = ref<SocialWorkStatus>('draft')
-const youtubeUrl = ref('')
-const youtubeTitle = ref('')
+const videoUrl = ref('')
+const videoTitle = ref('')
 const editingId = ref<string | null>(null)
 const pendingImages = ref<File[]>([])
 const formError = ref('')
@@ -88,8 +91,8 @@ function loadPost(post: SocialWorkPost) {
   description.value = post.description
   status.value = post.status
   pendingImages.value = []
-  youtubeUrl.value = ''
-  youtubeTitle.value = ''
+  videoUrl.value = ''
+  videoTitle.value = ''
   formError.value = ''
   formSuccess.value = ''
 }
@@ -100,8 +103,8 @@ function resetForm() {
   description.value = ''
   status.value = 'draft'
   pendingImages.value = []
-  youtubeUrl.value = ''
-  youtubeTitle.value = ''
+  videoUrl.value = ''
+  videoTitle.value = ''
   formError.value = ''
   formSuccess.value = ''
   if (route.query.edit) {
@@ -150,20 +153,20 @@ async function uploadPendingImages(postId: string) {
   }
 }
 
-async function addYoutubeVideo(postId: string) {
-  const url = youtubeUrl.value.trim()
+async function addExternalVideo(postId: string) {
+  const url = videoUrl.value.trim()
   if (!url) return
 
   await $fetch(`/api/admin/labores-sociales/${postId}/videos`, {
     method: 'POST',
     body: {
-      youtubeUrl: url,
-      title: youtubeTitle.value.trim(),
+      videoUrl: url,
+      title: videoTitle.value.trim(),
     },
   })
 
-  youtubeUrl.value = ''
-  youtubeTitle.value = ''
+  videoUrl.value = ''
+  videoTitle.value = ''
 }
 
 async function submitForm() {
@@ -201,8 +204,8 @@ async function submitForm() {
       await uploadPendingImages(postId)
     }
 
-    if (postId && youtubeUrl.value.trim()) {
-      await addYoutubeVideo(postId)
+    if (postId && videoUrl.value.trim()) {
+      await addExternalVideo(postId)
     }
 
     await refresh()
@@ -225,12 +228,12 @@ async function submitForm() {
 }
 
 async function addVideoToExisting() {
-  if (!editingId.value || !youtubeUrl.value.trim()) return
+  if (!editingId.value || !videoUrl.value.trim()) return
   formError.value = ''
   formSuccess.value = ''
 
   try {
-    await addYoutubeVideo(editingId.value)
+    await addExternalVideo(editingId.value)
     await refresh()
     formSuccess.value = 'Video agregado'
   }
@@ -500,29 +503,29 @@ const editingPost = computed(() =>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label
-                for="sw-youtube"
+                for="sw-video-url"
                 class="mb-2 block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant"
               >
-                Video YouTube (URL)
+                Video YouTube o TikTok (URL)
               </label>
               <input
-                id="sw-youtube"
-                v-model="youtubeUrl"
+                id="sw-video-url"
+                v-model="videoUrl"
                 type="url"
                 class="w-full rounded-lg border border-outline-variant/20 bg-surface-container-high px-4 py-3 text-on-surface focus:border-primary/50 focus:outline-none"
-                placeholder="https://youtube.com/watch?v=..."
+                placeholder="https://youtube.com/... o https://tiktok.com/..."
               >
             </div>
             <div>
               <label
-                for="sw-youtube-title"
+                for="sw-video-title"
                 class="mb-2 block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant"
               >
                 Título del video (opcional)
               </label>
               <input
-                id="sw-youtube-title"
-                v-model="youtubeTitle"
+                id="sw-video-title"
+                v-model="videoTitle"
                 type="text"
                 maxlength="160"
                 class="w-full rounded-lg border border-outline-variant/20 bg-surface-container-high px-4 py-3 text-on-surface focus:border-primary/50 focus:outline-none"
@@ -532,7 +535,7 @@ const editingPost = computed(() =>
           </div>
 
           <button
-            v-if="editingId && youtubeUrl.trim()"
+            v-if="editingId && videoUrl.trim()"
             type="button"
             class="font-label-sm text-label-sm uppercase tracking-wider text-primary hover:underline"
             @click="addVideoToExisting"
@@ -614,7 +617,7 @@ const editingPost = computed(() =>
                   />
                   <div class="min-w-0">
                     <p class="truncate text-sm font-medium text-on-surface">
-                      {{ video.title || 'Video de YouTube' }}
+                      {{ video.title || `Video de ${videoProviderLabel(video.videoProvider)}` }}
                     </p>
                     <p class="truncate text-xs text-on-surface-variant">
                       {{ video.youtubeUrl }}

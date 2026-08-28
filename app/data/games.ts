@@ -1,0 +1,248 @@
+import type { Game } from '~/types/games'
+
+export const GAMES: Game[] = [
+  {
+    id: 'snake',
+    title: 'SNAKE',
+    category: 'ARCADE',
+    color: '#00ff50',
+    description: 'Come frutas, crece y no te muerdas la cola.',
+  },
+  {
+    id: 'tetris',
+    title: 'TETRIS',
+    category: 'PUZZLE',
+    color: '#4dd0e1',
+    description: 'Apila tetrominos antes de que el techo te aplaste.',
+  },
+  {
+    id: 'asteroids',
+    title: 'ASTEROIDS',
+    category: 'SHOOTER',
+    color: '#ffff00',
+    description: 'Pulveriza rocas en gravedad cero.',
+  },
+  {
+    id: 'arkanoid',
+    title: 'ARKANOID',
+    category: 'ARCADE',
+    color: '#00ffff',
+    description: 'Rompe todos los bloques antes de perder tus 3 vidas.',
+  },
+  {
+    id: 'frogger',
+    title: 'FROGGER',
+    category: 'ARCADE',
+    color: '#00ff00',
+    description: 'Cruza la carretera y el río sin morir.',
+  },
+  {
+    id: 'infiltrado',
+    title: 'EL INFILTRADO',
+    category: 'PARTY',
+    color: '#c084fc',
+    description: 'Encuentra al impostor con pistas y votaciones. 4-10 jugadores.',
+    mode: 'multiplayer',
+    emoji: '🕵️',
+    minPlayers: 4,
+    maxPlayers: 10,
+    funRating: 5,
+    difficulty: 4,
+    guide: {
+      summary:
+        'Un juego de deducción social. Todos reciben una palabra secreta excepto uno: el infiltrado. Cada jugador da una pista, luego votan quién creen que miente. Si lo descubren, ganan los civiles; si no, el infiltrado puede adivinar la palabra para ganar.',
+      steps: [
+        'Entra a una sala con 4-10 amigos (cada uno en su celular o compartiendo pantalla).',
+        'Todos reciben la misma palabra secreta, excepto el infiltrado.',
+        'Por turnos, cada jugador escribe una pista relacionada con la palabra.',
+        'Cuando todos dieron su pista, votan quién creen que es el infiltrado.',
+        'Si lo atrapan, ganan los civiles. Si no, el infiltrado intenta adivinar la palabra.',
+      ],
+      rules: [
+        'El infiltrado debe dar una pista convincente sin conocer la palabra.',
+        'No puedes votarte a ti mismo.',
+        'Las pistas deben ser de 2 a 40 caracteres.',
+      ],
+    },
+  },
+  {
+    id: 'bomba',
+    title: 'LA BOMBA',
+    category: 'PARTY',
+    color: '#ff6b6b',
+    description: 'Pasa la bomba antes de que explote. ¡Nadie sabe cuánto queda!',
+    mode: 'multiplayer',
+    emoji: '💣',
+    minPlayers: 3,
+    maxPlayers: 10,
+    funRating: 5,
+    difficulty: 5,
+    guide: {
+      summary:
+        'Un jugador recibe una bomba con temporizador secreto. Debe pasársela a otro antes de que explote. Nadie sabe cuánto tiempo queda realmente. Al explotar pierdes una vida y la dificultad sube con bombas falsas, congelados, escudos y robos.',
+      steps: [
+        'Crea o únete a una sala con tus amigos.',
+        'Al iniciar, un jugador recibe la bomba 💣.',
+        'El que tiene la bomba debe pasarla a otro jugador.',
+        'Cuando explota, el portador pierde una vida.',
+        'El último jugador con vidas gana. Cada ronda es más difícil.',
+      ],
+      rules: [
+        'Solo quien tiene la bomba ve el tiempo real (el resto ve ~12s falso).',
+        'No puedes pasarte la bomba a ti mismo.',
+        'Jugadores congelados 🧊 no pueden recibir la bomba.',
+        'Los escudos 🛡️ bloquean una explosión o un robo.',
+      ],
+    },
+  },
+  {
+    id: 'no-piso',
+    title: 'NO TOQUES EL PISO',
+    category: 'PARTY',
+    color: '#fb923c',
+    description: 'Salta entre plataformas mientras el suelo desaparece. El último gana.',
+    mode: 'multiplayer',
+    emoji: '🏃',
+    minPlayers: 2,
+    maxPlayers: 8,
+    funRating: 5,
+    difficulty: 7,
+    guide: {
+      summary:
+        'Un survival 2D multijugador. Todos corren y saltan entre plataformas mientras el suelo desaparece poco a poco. Cada cierto tiempo hay aviso de que el piso caerá en 3 segundos. El último jugador en pie gana.',
+      steps: [
+        'Únete a la sala con 2-8 jugadores.',
+        'Usa ← → o A/D para moverte y Espacio/W para saltar.',
+        'Salta entre plataformas antes de que desaparezcan.',
+        'Si caes al lava 🌋, quedas eliminado.',
+        'El último sobreviviente gana la partida.',
+      ],
+      rules: [
+        'Controles: flechas o WASD + espacio para saltar.',
+        'En móvil hay botones en pantalla.',
+        'El suelo inferior desaparece primero; luego sube el nivel de peligro.',
+      ],
+    },
+  },
+  {
+    id: 'party-chaos',
+    title: 'PARTY CHAOS',
+    category: 'PARTY',
+    color: '#f472b6',
+    description: '10 rondas mezclando retos, risas y traición. ¡Pasa el celular!',
+    mode: 'local',
+    emoji: '🎮',
+    minPlayers: 2,
+    maxPlayers: 8,
+    funRating: 5,
+    difficulty: 5,
+    guide: {
+      summary:
+        'El modo definitivo para una noche con amigos. Mezcla automáticamente retos, "No Te Rías" y pruebas del Cerebro del Grupo en 10 rondas. Un solo celular, muchas risas.',
+      steps: [
+        'Agrega los nombres de 2 a 8 jugadores.',
+        'Configura vidas, rondas y categorías de retos.',
+        'Pulsa Jugar: cada ronda es un mini-juego distinto.',
+        'Pasa el celular según indique la pantalla.',
+        'Al final gana quien tenga más puntos.',
+      ],
+      rules: [
+        'Ideal para grupos que no saben qué juego elegir.',
+        'Las rondas rotan entre retos, risas, memoria y traición.',
+        'Puedes activar o desactivar los sonidos en configuración.',
+      ],
+    },
+  },
+  {
+    id: 'reto-o-pierdes',
+    title: 'EL RETO O PIERDES',
+    category: 'PARTY',
+    color: '#facc15',
+    description: 'Retos rápidos y votación del grupo. Pierdes una vida si fallas.',
+    mode: 'local',
+    emoji: '🤡',
+    minPlayers: 2,
+    maxPlayers: 8,
+    funRating: 5,
+    difficulty: 4,
+    guide: {
+      summary:
+        'Un juego de retos para pasar el celular. El jugador activo recibe un reto con cronómetro; los demás votan si lo logró o falló. Si la mayoría dice que falló, pierde una vida.',
+      steps: [
+        'Escribe los nombres de todos los jugadores.',
+        'Pasa el celular al jugador de turno cuando lo indique.',
+        'Lee el reto y completa la acción antes de que acabe el tiempo.',
+        'Pasa el celular al grupo para votar 👍 o 👎.',
+        'Pierdes una vida si la mayoría vota que fallaste. ¡Sigue hasta quedar uno!',
+      ],
+      rules: [
+        'Hay retos graciosos, mentales, de actuación, velocidad y más.',
+        'El cronómetro suena al terminar el tiempo.',
+        'Puedes elegir qué categorías de retos incluir en configuración.',
+      ],
+    },
+  },
+  {
+    id: 'no-te-rias',
+    title: 'NO TE RÍAS',
+    category: 'PARTY',
+    color: '#a78bfa',
+    description: 'Haz reír al objetivo sin romper las reglas. Modos especiales incluidos.',
+    mode: 'local',
+    emoji: '💀',
+    minPlayers: 2,
+    maxPlayers: 8,
+    funRating: 5,
+    difficulty: 4,
+    guide: {
+      summary:
+        'Un jugador es el objetivo y debe aguantar 30 segundos sin reírse mientras el resto del grupo intenta hacerlo reír con caras, chistes y actuaciones. Si se ríe, pierde; si aguanta, gana puntos.',
+      steps: [
+        'El celular elige un jugador objetivo.',
+        'El objetivo lee las reglas (varían según el modo).',
+        'Los demás tienen 30 segundos para hacerlo reír.',
+        'Si el objetivo se ríe → pierde. Si aguanta → gana +3 puntos.',
+        'Rota al siguiente objetivo cada ronda.',
+      ],
+      rules: [
+        '🚫 No tocar al objetivo · 🚫 No insultar · 🚫 No usar el celular',
+        '✅ Caras, gestos, hablar, actuar y contar chistes',
+        'Modo silencio: solo gestos. Modo personaje: actúas como gallina, robot, etc.',
+        'Modo palabra prohibida: si el objetivo la dice, pierde al instante.',
+      ],
+    },
+  },
+  {
+    id: 'cerebro-grupo',
+    title: 'EL CEREBRO DEL GRUPO',
+    category: 'PARTY',
+    color: '#38bdf8',
+    description: 'Memoria, velocidad, mentiras y misiones secretas. ¿Quién es el más listo?',
+    mode: 'local',
+    emoji: '🧠',
+    minPlayers: 2,
+    maxPlayers: 8,
+    funRating: 5,
+    difficulty: 6,
+    guide: {
+      summary:
+        'Mezcla de memoria, velocidad, mentiras y traición. Cada ronda es un tipo distinto de prueba: memorizar emojis, tocar colores al revés, inventar mentiras o cumplir misiones secretas contra otros jugadores.',
+      steps: [
+        'Pasa el celular al jugador de turno.',
+        'Memoria: memoriza emojis 5 segundos y responde la pregunta.',
+        'Velocidad: toca los colores en orden inverso.',
+        'Mentira: di 3 cosas, una falsa; el grupo vota si la descubrieron.',
+        'Traición: misión secreta solo visible para ti (+3 pts si cumples).',
+      ],
+      rules: [
+        'En traición, solo tú ves la misión — no muestres la pantalla.',
+        'Misión cumplida: +3 puntos. Descubiertos: -2 puntos.',
+        'Memoria y velocidad falladas = pierdes una vida.',
+      ],
+    },
+  },
+]
+
+export function getGameById(id: string): Game | undefined {
+  return GAMES.find((game) => game.id === id)
+}

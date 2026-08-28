@@ -11,6 +11,7 @@ type SocialWorkVideo = {
   id: string
   youtubeUrl: string
   youtubeId: string
+  videoProvider: 'youtube' | 'tiktok'
   thumbnailUrl: string
   title: string | null
   sortOrder: number
@@ -176,12 +177,10 @@ watch(
               class="overflow-hidden rounded-xl border border-outline-variant/10 bg-surface-container-low"
             >
               <div class="aspect-video">
-                <iframe
-                  :src="`https://www.youtube.com/embed/${video.youtubeId}`"
+                <ExternalVideoEmbed
+                  :provider="video.videoProvider"
+                  :video-id="video.youtubeId"
                   :title="video.title || post.title"
-                  class="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
                 />
               </div>
               <p

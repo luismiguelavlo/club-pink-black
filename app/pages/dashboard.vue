@@ -3,7 +3,7 @@ definePageMeta({
   middleware: 'auth',
 })
 
-await navigateTo('/feed')
+await navigateTo('/games')
 </script>
 
 <template>
