@@ -70,10 +70,10 @@ const showFeatured = computed(() => {
 </script>
 
 <template>
-  <section class="mb-section-gap px-gutter-desktop">
+  <section class="mb-section-gap flex flex-1 flex-col px-gutter-desktop">
     <p
       v-if="pending"
-      class="font-body-md py-16 text-center text-secondary"
+      class="font-body-md flex flex-1 items-center justify-center py-16 text-center text-secondary"
     >
       Cargando calendario…
     </p>
@@ -96,7 +96,7 @@ const showFeatured = computed(() => {
 
       <p
         v-if="!showFeatured && filteredEvents.length === 0"
-        class="font-body-md py-16 text-center text-secondary"
+        class="font-body-md flex flex-1 items-center justify-center py-16 text-center text-secondary"
       >
         No hay rodadas en este filtro. Prueba otra categoría.
       </p>

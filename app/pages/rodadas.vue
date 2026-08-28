@@ -34,44 +34,37 @@ function onRsvp(eventId: string) {
 </script>
 
 <template>
-  <div class="selection:bg-primary selection:text-on-primary">
-    <AppNavbar
-      :links="links"
-      cta-variant="primary-container"
-      cta-shape="chamfer"
+  <AppPageShell
+    :links="links"
+    :footer-links="footerLinks"
+    footer-highlight-brand
+    navbar-cta-variant="primary-container"
+    navbar-cta-shape="chamfer"
+    show-glow
+    main-class="pt-32"
+  >
+    <ArchiveHero
+      :title="eventsHero.title"
+      :description="eventsHero.description"
+    />
+    <ChipFilterBar
+      v-model="activeFilter"
+      :filters="eventFilters"
+    />
+    <EventsSchedule
+      :items="events"
+      :filter="activeFilter"
+      :pending="pending"
+      @rsvp="onRsvp"
     />
 
-    <main class="pt-32">
-      <ArchiveHero
-        :title="eventsHero.title"
-        :description="eventsHero.description"
+    <template #after>
+      <EventRsvpModal
+        v-model:open="rsvpOpen"
+        :event-id="selectedEventId"
+        :event-title="selectedEventTitle"
+        @success="refresh()"
       />
-      <ChipFilterBar
-        v-model="activeFilter"
-        :filters="eventFilters"
-      />
-      <EventsSchedule
-        :items="events"
-        :filter="activeFilter"
-        :pending="pending"
-        @rsvp="onRsvp"
-      />
-    </main>
-
-    <AppFooter
-      :links="footerLinks"
-      highlight-brand
-    />
-
-    <EventRsvpModal
-      v-model:open="rsvpOpen"
-      :event-id="selectedEventId"
-      :event-title="selectedEventTitle"
-      @success="refresh()"
-    />
-
-    <ClientOnly>
-      <GlowFollower />
-    </ClientOnly>
-  </div>
+    </template>
+  </AppPageShell>
 </template>

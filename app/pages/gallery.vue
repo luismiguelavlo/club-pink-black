@@ -18,26 +18,17 @@ const activeFilter = ref<GalleryFilter>('all')
 </script>
 
 <template>
-  <div class="selection:bg-primary selection:text-on-primary">
-    <AppNavbar
-      :links="links"
-      cta-variant="primary-container"
-      cta-shape="chamfer"
-    />
-
-    <main class="pt-32">
-      <ArchiveHero />
-      <ArchiveFilterBar v-model="activeFilter" />
-      <ArchiveMasonryGrid :filter="activeFilter" />
-    </main>
-
-    <AppFooter
-      :links="footerLinks"
-      highlight-brand
-    />
-
-    <ClientOnly>
-      <GlowFollower />
-    </ClientOnly>
-  </div>
+  <AppPageShell
+    :links="links"
+    :footer-links="footerLinks"
+    footer-highlight-brand
+    navbar-cta-variant="primary-container"
+    navbar-cta-shape="chamfer"
+    show-glow
+    main-class="pt-32"
+  >
+    <ArchiveHero />
+    <ArchiveFilterBar v-model="activeFilter" />
+    <ArchiveMasonryGrid :filter="activeFilter" />
+  </AppPageShell>
 </template>

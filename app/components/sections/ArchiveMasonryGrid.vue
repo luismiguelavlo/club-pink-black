@@ -81,10 +81,10 @@ watch(
 </script>
 
 <template>
-  <section class="mb-section-gap px-gutter-desktop">
+  <section class="mb-section-gap flex flex-1 flex-col px-gutter-desktop">
     <p
       v-if="loading"
-      class="font-body-md py-16 text-center text-secondary"
+      class="font-body-md flex flex-1 items-center justify-center py-16 text-center text-secondary"
     >
       Cargando archivo…
     </p>
@@ -103,7 +103,7 @@ watch(
 
       <p
         v-else
-        class="font-body-md py-16 text-center text-secondary"
+        class="font-body-md flex flex-1 items-center justify-center py-16 text-center text-secondary"
       >
         Aún no hay contenido en este filtro.
       </p>

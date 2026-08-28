@@ -15,17 +15,14 @@ useSeoMeta({
 </script>
 
 <template>
-  <div>
-    <AppNavbar :links="links" />
-
-    <main>
-      <HeroSection />
-      <StatsSection />
-      <GallerySection />
-      <SocialWorkSection />
-      <ContactSection />
-    </main>
-
-    <AppFooter :links="footerLinks" />
-  </div>
+  <AppPageShell
+    :links="links"
+    :footer-links="footerLinks"
+  >
+    <HeroSection />
+    <StatsSection />
+    <GallerySection />
+    <SocialWorkSection />
+    <ContactSection />
+  </AppPageShell>
 </template>

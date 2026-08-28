@@ -47,7 +47,27 @@
   }
 }
 
+@layer base {
+  html,
+  body,
+  #__nuxt {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-on-background;
+  }
+}
+
 @layer components {
+  .page-shell {
+    @apply flex min-h-screen flex-col bg-background;
+  }
+
+  .page-shell-main {
+    @apply flex flex-1 flex-col;
+  }
+
   .masonry-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
