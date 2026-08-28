@@ -36,6 +36,12 @@ const memberNav: MemberNavItem[] = [
     icon: 'event',
     match: (path) => path.startsWith('/rides'),
   },
+  {
+    label: 'Mi garaje',
+    href: '/garage',
+    icon: 'two_wheeler',
+    match: (path) => path.startsWith('/garage'),
+  },
 ]
 
 const adminNav: MemberNavItem[] = [

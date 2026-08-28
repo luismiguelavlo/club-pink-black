@@ -87,6 +87,20 @@ useSeoMeta({
           @toggle-visibility="toggleProfileVisibility"
         />
 
+        <div
+          v-if="profile.isOwnProfile"
+          class="flex"
+        >
+          <NuxtLink
+            to="/garage"
+            class="flex items-center gap-2 rounded-2xl border border-outline-variant/20 bg-surface-container-low/30 px-5 py-3 text-sm text-on-surface-variant transition-colors hover:border-primary/30 hover:text-primary"
+          >
+            <MaterialIcon name="two_wheeler" class="text-base" />
+            <span>Ver mi garaje</span>
+            <MaterialIcon name="arrow_forward" class="text-sm" />
+          </NuxtLink>
+        </div>
+
         <ProfileGallery
           :images="profile.gallery"
           :is-own-profile="profile.isOwnProfile"
