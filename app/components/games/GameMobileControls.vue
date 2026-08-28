@@ -7,6 +7,8 @@ defineProps<{
   layout: MobileControlLayout
 }>()
 
+let lastTouchTapAt = 0
+
 function hold(code: string, e: TouchEvent | MouseEvent) {
   e.preventDefault()
   pressGameKey(code)
@@ -19,6 +21,15 @@ function unhold(code: string, e: TouchEvent | MouseEvent) {
 
 function tap(code: string, e: TouchEvent | MouseEvent) {
   e.preventDefault()
+
+  if (e.type === 'click' && Date.now() - lastTouchTapAt < 500) {
+    return
+  }
+
+  if (e.type === 'touchstart') {
+    lastTouchTapAt = Date.now()
+  }
+
   tapGameKey(code)
 }
 

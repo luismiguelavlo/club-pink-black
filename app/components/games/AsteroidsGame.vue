@@ -38,8 +38,8 @@ onMounted(() => {
     keys[e.code] = false
   }
 
-  window.addEventListener('keydown', onKeyDown)
-  window.addEventListener('keyup', onKeyUp)
+  document.addEventListener('keydown', onKeyDown)
+  document.addEventListener('keyup', onKeyUp)
 
   function pressed(code: string) {
     const val = justPressed[code]
@@ -489,8 +489,8 @@ onMounted(() => {
 
   onUnmounted(() => {
     cancelAnimationFrame(rafId)
-    window.removeEventListener('keydown', onKeyDown)
-    window.removeEventListener('keyup', onKeyUp)
+    document.removeEventListener('keydown', onKeyDown)
+    document.removeEventListener('keyup', onKeyUp)
   })
 })
 </script>

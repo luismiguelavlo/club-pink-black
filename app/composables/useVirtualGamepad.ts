@@ -17,7 +17,6 @@ export function dispatchGameKey(type: 'keydown' | 'keyup', code: string) {
     cancelable: true,
   })
 
-  window.dispatchEvent(event)
   document.dispatchEvent(event)
 }
 
@@ -31,5 +30,7 @@ export function releaseGameKey(code: string) {
 
 export function tapGameKey(code: string) {
   pressGameKey(code)
-  releaseGameKey(code)
+  requestAnimationFrame(() => {
+    releaseGameKey(code)
+  })
 }
