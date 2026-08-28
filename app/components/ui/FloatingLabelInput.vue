@@ -10,6 +10,7 @@ const props = withDefaults(
     autocomplete?: string
     disabled?: boolean
     showPasswordToggle?: boolean
+    minlength?: number
   }>(),
   {
     type: 'text',
@@ -36,6 +37,7 @@ const inputType = computed(() => {
       :required="props.required"
       :autocomplete="props.autocomplete"
       :disabled="props.disabled"
+      :minlength="props.minlength"
       placeholder=" "
       class="peer w-full border-0 border-b border-outline-variant bg-transparent px-0 py-3 font-body-md text-on-surface transition-colors focus:border-primary focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60"
       :class="showPasswordToggle && props.type === 'password' ? 'pr-10' : ''"

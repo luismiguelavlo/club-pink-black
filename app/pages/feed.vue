@@ -186,10 +186,6 @@ async function toggleIgnite(post: FeedPost) {
     igniteBusy.value = { ...igniteBusy.value, [post.id]: false }
   }
 }
-
-onBeforeUnmount(() => {
-  clearPreviews()
-})
 </script>
 
 <template>

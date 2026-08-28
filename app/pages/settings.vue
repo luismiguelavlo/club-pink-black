@@ -108,6 +108,12 @@ async function savePassword() {
     return
   }
 
+  if (passwords.newPassword.length < 8) {
+    passwordError.value = 'La nueva contraseña debe tener al menos 8 caracteres'
+    passwordLoading.value = false
+    return
+  }
+
   try {
     const result = await $fetch<{ message: string }>('/api/me/password', {
       method: 'POST',
@@ -258,6 +264,7 @@ async function savePassword() {
             autocomplete="new-password"
             show-password-toggle
             required
+            minlength="8"
           />
           <FloatingLabelInput
             id="settings-confirm-password"
@@ -267,6 +274,7 @@ async function savePassword() {
             autocomplete="new-password"
             show-password-toggle
             required
+            minlength="8"
           />
 
           <p
