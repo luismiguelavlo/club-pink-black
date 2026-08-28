@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getGameById } from '~/data/games'
+import type { MobileControlLayout } from '~/components/games/GameMobileControls.vue'
 import type { LocalGameId } from '~/types/party-chaos'
 
 definePageMeta({
@@ -87,6 +88,19 @@ const restartGame = () => {
 const goBack = () => {
   navigateTo('/games')
 }
+
+const MOBILE_LAYOUTS: Record<string, MobileControlLayout> = {
+  snake: 'dpad',
+  frogger: 'dpad',
+  tetris: 'tetris',
+  asteroids: 'asteroids',
+  arkanoid: 'paddle',
+}
+
+const mobileLayout = computed(() => MOBILE_LAYOUTS[gameId] ?? 'dpad')
+const showMobileControls = computed(
+  () => (state.value === 'playing' || state.value === 'paused') && MOBILE_LAYOUTS[gameId],
+)
 </script>
 
 <template>
@@ -205,7 +219,7 @@ const goBack = () => {
         <div class="flex-1">
           <div class="relative overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-low/30">
             <!-- Game Canvas Container -->
-            <div class="relative aspect-square w-full bg-black">
+            <div class="relative aspect-square w-full touch-none bg-black">
               <SnakeGame
                 v-if="gameId === 'snake' && state !== 'idle'"
                 :paused="state === 'paused'"
@@ -327,6 +341,12 @@ const goBack = () => {
 
             </div>
           </div>
+
+          <GameMobileControls
+            v-if="showMobileControls"
+            :layout="mobileLayout"
+            class="mt-4 lg:hidden"
+          />
         </div>
 
         <!-- Sidebar -->
@@ -397,14 +417,34 @@ const goBack = () => {
               </div>
 
               <div class="mt-6 space-y-2 border-t border-outline-variant/20 pt-4">
-                <p class="font-label-sm text-label-sm uppercase text-on-surface-variant">
+                <p class="font-label-sm text-label-sm uppercase text-on-surface-variant lg:hidden">
+                  En celular
+                </p>
+                <p class="hidden font-label-sm text-label-sm uppercase text-on-surface-variant lg:block">
                   Teclas
                 </p>
-                <div class="space-y-1 text-sm text-on-surface-variant">
+                <div class="space-y-1 text-sm text-on-surface-variant lg:hidden">
+                  <p v-if="mobileLayout === 'dpad'">
+                    Usa el pad direccional debajo del juego.
+                  </p>
+                  <p v-else-if="mobileLayout === 'tetris'">
+                    Mueve, rota y baja piezas con los botones táctiles.
+                  </p>
+                  <p v-else-if="mobileLayout === 'asteroids'">
+                    Gira, acelera y dispara con los botones táctiles.
+                  </p>
+                  <p v-else-if="mobileLayout === 'paddle'">
+                    Arrastra sobre el juego o usa los botones ← →.
+                  </p>
+                </div>
+                <div class="hidden space-y-1 text-sm text-on-surface-variant lg:block">
                   <p>↑ / W - Arriba</p>
                   <p>↓ / S - Abajo</p>
                   <p>← / A - Izquierda</p>
                   <p>→ / D - Derecha</p>
+                  <p v-if="gameId === 'tetris'">
+                    Espacio - Caída rápida
+                  </p>
                   <p v-if="gameId === 'asteroids'">
                     Espacio - Disparar
                   </p>

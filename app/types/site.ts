@@ -70,6 +70,19 @@ export type FooterLink = {
   href: string
 }
 
+export type PhilosophyContent = {
+  title: string
+  intro: string
+  rulesTitle: string
+  rules: string[]
+  newMemberTitle: string
+  newMemberIntro: string
+  newMemberChecklist: string[]
+  essenceTitle: string
+  essence: string
+  closing: string
+}
+
 export type JoinFormPayload = {
   name: string
   machine: string

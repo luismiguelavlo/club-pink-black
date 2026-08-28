@@ -1,10 +1,10 @@
 <template>
-  <div class="flex h-full w-full items-center justify-center">
+  <div class="flex h-full w-full touch-none items-center justify-center">
     <canvas
       ref="canvasRef"
       :width="800"
       :height="600"
-      class="block max-h-full max-w-full"
+      class="block max-h-full max-w-full touch-none"
     />
   </div>
 </template>
@@ -319,17 +319,30 @@ onMounted(() => {
     if (e.key in keys) keys[e.key] = false
   }
 
-  function onMouseMove(e: MouseEvent) {
+  function movePaddleToClientX(clientX: number) {
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
     const scaleX = W / rect.width
-    const mouseX = (e.clientX - rect.left) * scaleX
-    paddle.x = Math.max(0, Math.min(W - paddle.w, mouseX - paddle.w / 2))
+    const pointerX = (clientX - rect.left) * scaleX
+    paddle.x = Math.max(0, Math.min(W - paddle.w, pointerX - paddle.w / 2))
+  }
+
+  function onMouseMove(e: MouseEvent) {
+    movePaddleToClientX(e.clientX)
+  }
+
+  function onTouchMove(e: TouchEvent) {
+    e.preventDefault()
+    const touch = e.touches[0]
+    if (!touch) return
+    movePaddleToClientX(touch.clientX)
   }
 
   document.addEventListener('keydown', onKeyDown)
   document.addEventListener('keyup', onKeyUp)
   canvas.addEventListener('mousemove', onMouseMove)
+  canvas.addEventListener('touchstart', onTouchMove, { passive: false })
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false })
 
   initPaddle()
   loadLevel(1)
@@ -340,6 +353,8 @@ onMounted(() => {
     document.removeEventListener('keydown', onKeyDown)
     document.removeEventListener('keyup', onKeyUp)
     canvas.removeEventListener('mousemove', onMouseMove)
+    canvas.removeEventListener('touchstart', onTouchMove)
+    canvas.removeEventListener('touchmove', onTouchMove)
   })
 })
 </script>

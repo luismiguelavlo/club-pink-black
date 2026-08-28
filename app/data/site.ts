@@ -5,6 +5,7 @@
   GalleryFilter,
   GalleryItem,
   NavLink,
+  PhilosophyContent,
   StatItem,
   FilterOption,
   EventFilter,
@@ -66,6 +67,34 @@ export const clubStats: StatItem[] = [
   { value: '40', label: 'Rodadas realizadas', align: 'left' },
   { value: '+50,000', label: 'KM Recorridos', align: 'left' },
 ]
+
+export const philosophyContent = {
+  title: '🖤💗 FAMILY PINK & BLACK ROAD RIDERS BGA 🏍️',
+  intro:
+    'Más que un grupo de motociclistas, somos una familia que rueda con respeto, unión y pasión por las dos ruedas.',
+  rulesTitle: '📍 Normas de la familia',
+  rules: [
+    '🤝 El respeto entre todos los integrantes es nuestra prioridad.',
+    '🏍️ La seguridad siempre va primero. Cada piloto es responsable de portar sus documentos y elementos de protección.',
+    '🚫 No se permiten faltas de respeto, discriminación, conflictos, comentarios ofensivos ni comportamientos que afecten el ambiente del grupo.',
+    '📢 Evitemos el spam, publicidad o contenido ajeno a las actividades del grupo sin autorización de los administradores.',
+    '⏰ Se agradece confirmar asistencia a las rodadas cuando sea solicitado.',
+  ],
+  newMemberTitle: '👋 Si eres nuevo(a)',
+  newMemberIntro: 'Antes de participar en las rodadas, preséntate enviando:',
+  newMemberChecklist: [
+    '✅ Nombre.',
+    '✅ Edad.',
+    '✅ Municipio donde vives.',
+    '✅ Profesión u ocupación.',
+    '✅ Moto (marca, modelo y cilindraje).',
+    '✅ Una foto de tu moto. 📸🏍️',
+  ],
+  essenceTitle: '💗 Nuestra esencia',
+  essence:
+    'Rodamos para disfrutar, conocer nuevos lugares, crear amistades y vivir experiencias inolvidables. Aquí todos somos importantes; el compañerismo y el respeto nos representan.',
+  closing: 'Rodamos juntos, llegamos juntos. 🖤💗',
+} as const satisfies PhilosophyContent
 
 export const galleryItems: GalleryItem[] = [
   {

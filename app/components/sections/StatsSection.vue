@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import type { StatItem } from '~/types/site'
-import { clubLogo, clubStats } from '~/data/site'
+import type { PhilosophyContent, StatItem } from '~/types/site'
+import { clubLogo, clubStats, philosophyContent } from '~/data/site'
 
 const props = withDefaults(
   defineProps<{
     stats?: StatItem[]
     logoSrc?: string
     logoAlt?: string
+    philosophy?: PhilosophyContent
   }>(),
   {
     stats: () => clubStats,
     logoSrc: clubLogo.src,
     logoAlt: clubLogo.alt,
+    philosophy: () => philosophyContent,
   },
 )
 
@@ -55,6 +57,70 @@ const rightStats = computed(() => props.stats.filter((stat) => stat.align === 'l
             :label="stat.label"
             align="left"
           />
+        </div>
+      </div>
+
+      <div class="mt-16 border-t border-outline-variant/30 pt-16 md:mt-20 md:pt-20">
+        <div class="mx-auto max-w-3xl text-center">
+          <span class="mb-3 block font-label-sm text-label-sm uppercase tracking-[0.3em] text-primary">
+            Filosofía
+          </span>
+          <h2 class="font-headline-lg text-balance text-on-surface">
+            {{ philosophy.title }}
+          </h2>
+          <p class="mt-4 font-body-md text-on-surface-variant">
+            {{ philosophy.intro }}
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-6 lg:grid-cols-2">
+          <div class="rounded-2xl border border-outline-variant/20 bg-surface-container-low/30 p-6 md:p-8">
+            <h3 class="font-headline-lg mb-5 text-lg text-on-surface">
+              {{ philosophy.rulesTitle }}
+            </h3>
+            <ul class="space-y-4">
+              <li
+                v-for="(rule, index) in philosophy.rules"
+                :key="index"
+                class="flex gap-3 font-body-md text-on-surface-variant"
+              >
+                <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                <span>{{ rule }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="space-y-6">
+            <div class="rounded-2xl border border-outline-variant/20 bg-surface-container-low/30 p-6 md:p-8">
+              <h3 class="font-headline-lg mb-3 text-lg text-on-surface">
+                {{ philosophy.newMemberTitle }}
+              </h3>
+              <p class="mb-4 font-body-md text-on-surface-variant">
+                {{ philosophy.newMemberIntro }}
+              </p>
+              <ul class="space-y-2">
+                <li
+                  v-for="(item, index) in philosophy.newMemberChecklist"
+                  :key="index"
+                  class="font-body-md text-on-surface-variant"
+                >
+                  {{ item }}
+                </li>
+              </ul>
+            </div>
+
+            <div class="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8">
+              <h3 class="font-headline-lg mb-3 text-lg text-on-surface">
+                {{ philosophy.essenceTitle }}
+              </h3>
+              <p class="font-body-md text-on-surface-variant">
+                {{ philosophy.essence }}
+              </p>
+              <p class="mt-4 font-label-sm text-label-sm uppercase tracking-wider text-primary">
+                {{ philosophy.closing }}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
