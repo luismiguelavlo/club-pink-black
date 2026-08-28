@@ -4,6 +4,7 @@ type Author = {
   name: string
   role: 'admin' | 'user'
   motorcycle: string | null
+  avatarUrl: string | null
 }
 
 type FeedComment = {
@@ -38,6 +39,7 @@ type TopPilot = {
   name: string
   role: 'admin' | 'user'
   motorcycle: string | null
+  avatarUrl: string | null
   postsCount: number
   rank: number
 }
@@ -203,9 +205,12 @@ async function toggleIgnite(post: FeedPost) {
         <div class="relative rounded-2xl border-l border-t border-white/5 bg-surface-container-lowest/40 p-6 shadow-2xl backdrop-blur-xl">
           <div class="flex gap-4">
             <div class="relative shrink-0">
-              <div class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-primary/40 bg-surface-container-highest font-label-sm text-primary">
-                {{ user?.name?.charAt(0)?.toUpperCase() ?? 'P' }}
-              </div>
+              <UserAvatar
+                :name="user?.name ?? 'Piloto'"
+                :avatar-url="user?.avatarUrl"
+                size="lg"
+                ring
+              />
             </div>
 
             <div class="min-w-0 flex-1">
@@ -257,11 +262,15 @@ async function toggleIgnite(post: FeedPost) {
           class="overflow-hidden rounded-3xl bg-surface-container-lowest/30 shadow-xl"
         >
           <div class="flex items-center justify-between p-6">
-            <div class="flex items-center gap-4">
+            <NuxtLink
+              :to="`/profile/${post.author.id}`"
+              class="flex items-center gap-4 transition-opacity hover:opacity-90"
+            >
               <div class="rounded-full border border-primary/50 p-1">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-highest font-label-sm text-primary">
-                  {{ post.author.name.charAt(0).toUpperCase() }}
-                </div>
+                <UserAvatar
+                  :name="post.author.name"
+                  :avatar-url="post.author.avatarUrl"
+                />
               </div>
               <div>
                 <h3 class="font-headline-lg text-body-md text-on-surface">
@@ -273,7 +282,7 @@ async function toggleIgnite(post: FeedPost) {
                   · {{ relativeTime(post.createdAt) }}
                 </p>
               </div>
-            </div>
+            </NuxtLink>
 
             <button
               v-if="post.canDelete"
@@ -463,20 +472,25 @@ async function toggleIgnite(post: FeedPost) {
               :key="pilot.id"
               class="flex items-center justify-between rounded-xl bg-surface-container-highest/20 p-3 transition-colors hover:bg-primary/5"
             >
-              <div class="flex items-center gap-3">
+              <NuxtLink
+                :to="`/profile/${pilot.id}`"
+                class="flex min-w-0 flex-1 items-center gap-3"
+              >
                 <span
                   class="w-4 font-label-sm text-label-sm"
                   :class="pilot.rank === 1 ? 'text-primary' : 'text-on-surface-variant'"
                 >
                   {{ pilot.rank.toString().padStart(2, '0') }}
                 </span>
-                <div class="flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-surface-container-highest text-xs text-primary">
-                  {{ pilot.name.charAt(0).toUpperCase() }}
-                </div>
-                <span class="font-body-md text-on-surface">
+                <UserAvatar
+                  :name="pilot.name"
+                  :avatar-url="pilot.avatarUrl"
+                  size="sm"
+                />
+                <span class="truncate font-body-md text-on-surface">
                   {{ pilot.name }}
                 </span>
-              </div>
+              </NuxtLink>
               <span class="font-label-sm text-label-sm text-on-surface-variant">
                 {{ pilot.postsCount }} publicaciones
               </span>

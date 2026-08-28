@@ -18,9 +18,25 @@ export const users = pgTable('users', {
   name: text('name').notNull(),
   role: userRoleEnum('role').notNull().default('user'),
   motorcycle: text('motorcycle'),
+  avatarUrl: text('avatar_url'),
+  avatarCloudinaryPublicId: text('avatar_cloudinary_public_id'),
+  bio: text('bio'),
+  profilePublic: boolean('profile_public').notNull().default(true),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const userGalleryImages = pgTable('user_gallery_images', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  imageUrl: text('image_url').notNull(),
+  cloudinaryPublicId: text('cloudinary_public_id').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  bytes: integer('bytes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
 export const invites = pgTable('invites', {
@@ -203,6 +219,7 @@ export const socialWorkVideos = pgTable('social_work_videos', {
 
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
+export type UserGalleryImage = typeof userGalleryImages.$inferSelect
 export type UserRole = 'admin' | 'user'
 export type Invite = typeof invites.$inferSelect
 export type InviteStatus = 'pending' | 'accepted' | 'revoked' | 'expired'

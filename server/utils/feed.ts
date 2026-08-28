@@ -16,6 +16,7 @@ export type FeedAuthor = {
   name: string
   role: UserRole
   motorcycle: string | null
+  avatarUrl: string | null
 }
 
 export type FeedImage = {
@@ -54,52 +55,33 @@ function toAuthor(row: {
   name: string
   role: UserRole
   motorcycle: string | null
+  avatarUrl?: string | null
 }): FeedAuthor {
   return {
     id: row.id,
     name: row.name,
     role: row.role,
     motorcycle: row.motorcycle,
+    avatarUrl: row.avatarUrl ?? null,
   }
 }
 
-export function formatRelativeTime(date: Date | string) {
-  const value = typeof date === 'string' ? new Date(date) : date
-  const diffMs = Date.now() - value.getTime()
-  const minutes = Math.floor(diffMs / 60000)
-  if (minutes < 1) return 'ahora'
-  if (minutes < 60) return `hace ${minutes} min`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `hace ${hours} h`
-  const days = Math.floor(hours / 24)
-  return `hace ${days} d`
-}
-
-export { roleLabel }
-
-export async function listFeedPosts(viewer: {
-  id: string
-  role: UserRole
-}): Promise<FeedPost[]> {
-  const db = useDb()
-
-  const rows = await db
-    .select({
-      id: posts.id,
-      body: posts.body,
-      createdAt: posts.createdAt,
-      authorId: users.id,
-      authorName: users.name,
-      authorRole: users.role,
-      authorMotorcycle: users.motorcycle,
-    })
-    .from(posts)
-    .innerJoin(users, eq(posts.authorId, users.id))
-    .orderBy(desc(posts.createdAt))
-    .limit(50)
-
+async function hydrateFeedPosts(
+  rows: Array<{
+    id: string
+    body: string
+    createdAt: Date
+    authorId: string
+    authorName: string
+    authorRole: UserRole
+    authorMotorcycle: string | null
+    authorAvatarUrl: string | null
+  }>,
+  viewer: { id: string; role: UserRole },
+): Promise<FeedPost[]> {
   if (!rows.length) return []
 
+  const db = useDb()
   const postIds = rows.map((row) => row.id)
 
   const [imageRows, commentRows, commentCounts, igniteCounts, myIgnites] = await Promise.all([
@@ -118,6 +100,7 @@ export async function listFeedPosts(viewer: {
         authorName: users.name,
         authorRole: users.role,
         authorMotorcycle: users.motorcycle,
+        authorAvatarUrl: users.avatarUrl,
       })
       .from(comments)
       .innerJoin(users, eq(comments.authorId, users.id))
@@ -172,6 +155,7 @@ export async function listFeedPosts(viewer: {
         name: comment.authorName,
         role: comment.authorRole,
         motorcycle: comment.authorMotorcycle,
+        avatarUrl: comment.authorAvatarUrl,
       }),
       canDelete: viewer.role === 'admin' || comment.authorId === viewer.id,
     })
@@ -187,6 +171,7 @@ export async function listFeedPosts(viewer: {
       name: row.authorName,
       role: row.authorRole,
       motorcycle: row.authorMotorcycle,
+      avatarUrl: row.authorAvatarUrl,
     }),
     images: imagesByPost.get(row.id) ?? [],
     commentsCount: countMap.get(row.id) ?? 0,
@@ -197,6 +182,72 @@ export async function listFeedPosts(viewer: {
   }))
 }
 
+export async function listFeedPosts(viewer: {
+  id: string
+  role: UserRole
+}): Promise<FeedPost[]> {
+  const db = useDb()
+
+  const rows = await db
+    .select({
+      id: posts.id,
+      body: posts.body,
+      createdAt: posts.createdAt,
+      authorId: users.id,
+      authorName: users.name,
+      authorRole: users.role,
+      authorMotorcycle: users.motorcycle,
+      authorAvatarUrl: users.avatarUrl,
+    })
+    .from(posts)
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .orderBy(desc(posts.createdAt))
+    .limit(50)
+
+  return hydrateFeedPosts(rows, viewer)
+}
+
+export async function listUserPosts(
+  authorId: string,
+  viewer: { id: string; role: UserRole },
+  limit = 30,
+): Promise<FeedPost[]> {
+  const db = useDb()
+
+  const rows = await db
+    .select({
+      id: posts.id,
+      body: posts.body,
+      createdAt: posts.createdAt,
+      authorId: users.id,
+      authorName: users.name,
+      authorRole: users.role,
+      authorMotorcycle: users.motorcycle,
+      authorAvatarUrl: users.avatarUrl,
+    })
+    .from(posts)
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .where(eq(posts.authorId, authorId))
+    .orderBy(desc(posts.createdAt))
+    .limit(limit)
+
+  return hydrateFeedPosts(rows, viewer)
+}
+
+export function formatRelativeTime(date: Date | string) {
+  const value = typeof date === 'string' ? new Date(date) : date
+  const diffMs = Date.now() - value.getTime()
+  const minutes = Math.floor(diffMs / 60000)
+  if (minutes < 1) return 'ahora'
+  if (minutes < 60) return `hace ${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `hace ${hours} h`
+  const days = Math.floor(hours / 24)
+  return `hace ${days} d`
+}
+
+export { roleLabel }
+
 export async function getTopPilots(limit = 5) {
   const db = useDb()
   const rows = await db
@@ -205,6 +256,7 @@ export async function getTopPilots(limit = 5) {
       name: users.name,
       role: users.role,
       motorcycle: users.motorcycle,
+      avatarUrl: users.avatarUrl,
       postsCount: sql<number>`count(${posts.id})::int`,
     })
     .from(users)
@@ -218,6 +270,7 @@ export async function getTopPilots(limit = 5) {
     name: row.name,
     role: row.role,
     motorcycle: row.motorcycle,
+    avatarUrl: row.avatarUrl,
     postsCount: row.postsCount,
     rank: index + 1,
   }))

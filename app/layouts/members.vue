@@ -58,14 +58,15 @@ async function logout() {
 
       <div class="border-t border-outline-variant/10 p-6">
         <NuxtLink
-          to="/settings"
+          :to="`/profile/${user?.id}`"
           class="mb-2 flex w-full items-center gap-3 rounded-xl border border-outline-variant/20 bg-surface-container-high p-3 text-left transition-colors hover:border-primary/40"
         >
-          <div
-            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary/20 bg-surface-container-highest font-label-sm text-primary"
-          >
-            {{ user?.name?.charAt(0)?.toUpperCase() ?? 'P' }}
-          </div>
+          <UserAvatar
+            :name="user?.name ?? 'Piloto'"
+            :avatar-url="user?.avatarUrl"
+            size="md"
+            ring
+          />
           <div class="min-w-0 flex-1 overflow-hidden">
             <p class="truncate text-sm font-bold text-on-surface">
               {{ user?.name }}
@@ -75,7 +76,7 @@ async function logout() {
             </p>
           </div>
           <MaterialIcon
-            name="tune"
+            name="chevron_right"
             class="text-on-surface-variant"
           />
         </NuxtLink>

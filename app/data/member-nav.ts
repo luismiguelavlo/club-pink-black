@@ -13,6 +13,18 @@ const memberNav: MemberNavItem[] = [
     match: (path) => path.startsWith('/feed'),
   },
   {
+    label: 'Miembros',
+    href: '/members',
+    icon: 'groups',
+    match: (path) => path.startsWith('/members'),
+  },
+  {
+    label: 'Mi perfil',
+    href: '/profile',
+    icon: 'account_circle',
+    match: (path) => path.startsWith('/profile'),
+  },
+  {
     label: 'Rodadas',
     href: '/rides',
     icon: 'event',

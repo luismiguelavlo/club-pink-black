@@ -73,6 +73,11 @@ export const updateProfileSchema = z.object({
     .union([z.literal(''), z.string().trim().max(120)])
     .optional()
     .transform((value) => (value ? value : undefined)),
+  bio: z
+    .union([z.literal(''), z.string().trim().max(280, 'La bio no puede superar 280 caracteres')])
+    .optional()
+    .transform((value) => (value ? value : undefined)),
+  profilePublic: z.boolean().optional(),
 })
 
 export const changePasswordSchema = z.object({

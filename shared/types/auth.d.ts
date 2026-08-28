@@ -5,6 +5,7 @@ declare module '#auth-utils' {
     name: string
     role: 'admin' | 'user'
     motorcycle?: string | null
+    avatarUrl?: string | null
     isActive?: boolean
   }
 

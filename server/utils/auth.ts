@@ -9,6 +9,7 @@ export type PublicUser = {
   name: string
   role: UserRole
   motorcycle?: string | null
+  avatarUrl?: string | null
   isActive: boolean
 }
 
@@ -19,6 +20,7 @@ export function toPublicUser(user: User): PublicUser {
     name: user.name,
     role: user.role,
     motorcycle: user.motorcycle,
+    avatarUrl: user.avatarUrl,
     isActive: user.isActive,
   }
 }
@@ -87,7 +89,7 @@ export async function createUser(input: {
 
 export async function updateOwnProfile(
   userId: string,
-  input: { name: string; motorcycle?: string },
+  input: { name: string; motorcycle?: string; bio?: string; profilePublic?: boolean },
 ): Promise<PublicUser> {
   const db = useDb()
   const [updated] = await db
@@ -95,6 +97,8 @@ export async function updateOwnProfile(
     .set({
       name: input.name.trim(),
       motorcycle: input.motorcycle?.trim() || null,
+      bio: input.bio?.trim() || null,
+      ...(input.profilePublic !== undefined ? { profilePublic: input.profilePublic } : {}),
       updatedAt: new Date(),
     })
     .where(eq(users.id, userId))
