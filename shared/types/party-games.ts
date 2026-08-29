@@ -1,4 +1,4 @@
-export type PartyGameId = 'infiltrado' | 'bomba' | 'no-piso'
+export type PartyGameId = 'infiltrado' | 'bomba' | 'no-piso' | 'mentiroso'
 
 export type PartyRoomStatus = 'lobby' | 'playing' | 'finished'
 
@@ -12,6 +12,9 @@ export type PartyRoomPhase =
   | 'bomba_exploded'
   | 'no_piso_warning'
   | 'no_piso_playing'
+  | 'mentiroso_answer'
+  | 'mentiroso_voting'
+  | 'mentiroso_reveal'
   | 'finished'
 
 export interface PartyPlayer {
@@ -32,6 +35,23 @@ export interface PartyPlayer {
   vy: number
   onGround: boolean
   color: string
+  points?: number
+  bluffAnswer?: string
+  votedOptionId?: string
+}
+
+export interface MentirosoOption {
+  id: string
+  text: string
+  authorId: string | null
+}
+
+export interface PartyChatMessage {
+  id: string
+  userId: string
+  name: string
+  text: string
+  sentAt: number
 }
 
 export interface NoPisoPlatform {
@@ -76,14 +96,26 @@ export interface PartyRoomState {
   floorCollapseAt?: number
   winnerId?: string
   winnerName?: string
+  mentirosoQuestionId?: string
+  mentirosoPrompt?: string
+  mentirosoRealAnswer?: string
+  mentirosoOptions?: MentirosoOption[]
+  mentirosoUsedQuestionIds?: string[]
+  mentirosoTotalRounds?: number
+  chatMessages?: PartyChatMessage[]
 }
 
-export type PartyRoomView = Omit<PartyRoomState, 'secretWord' | 'infiltratorId' | 'bombExpiresAt'> & {
+export type PartyRoomView = Omit<
+  PartyRoomState,
+  'secretWord' | 'infiltratorId' | 'bombExpiresAt' | 'mentirosoRealAnswer' | 'mentirosoOptions'
+> & {
   secretWord?: string
   infiltratorId?: string
   isInfiltrator?: boolean
   bombSecondsLeft?: number | null
   bombUrgent?: boolean
+  mentirosoRealAnswer?: string
+  mentirosoOptions?: (Omit<MentirosoOption, 'authorId'> & { authorId?: string | null; votes?: number; isMine?: boolean })[]
   me?: PartyPlayer
 }
 
@@ -95,3 +127,5 @@ export type PartyGameAction =
   | { type: 'steal_bomb'; targetUserId: string }
   | { type: 'move'; direction: 'left' | 'right' }
   | { type: 'jump' }
+  | { type: 'submit_answer'; text: string }
+  | { type: 'vote_answer'; optionId: string }

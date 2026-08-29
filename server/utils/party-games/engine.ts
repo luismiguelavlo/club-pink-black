@@ -1,11 +1,16 @@
+import { randomUUID } from 'node:crypto'
 import type {
+  PartyChatMessage,
   PartyGameAction,
   PartyPlayer,
   PartyRoomState,
   PartyRoomView,
 } from '#shared/types/party-games'
 import { pickRandomWord } from './words'
+import { pickRandomMentirosoQuestion } from './mentiroso-questions'
 import { saveRoom } from './store'
+
+const CHAT_MAX_MESSAGES = 50
 
 const PLAYER_COLORS = ['#ffb0ca', '#4dd0e1', '#00ff50', '#ffff00', '#ff6b6b', '#c084fc', '#fb923c', '#38bdf8', '#f472b6', '#a3e635']
 
@@ -17,6 +22,15 @@ const BOMBA_MAX = 10
 
 const NO_PISO_MIN = 2
 const NO_PISO_MAX = 8
+
+const MENTIROSO_MIN = 2
+const MENTIROSO_MAX = 10
+const MENTIROSO_TOTAL_ROUNDS = 6
+const MENTIROSO_ANSWER_MS = 45_000
+const MENTIROSO_VOTING_MS = 30_000
+const MENTIROSO_REVEAL_MS = 9_000
+const MENTIROSO_CORRECT_POINTS = 100
+const MENTIROSO_TRICK_POINTS = 50
 
 const WORLD_W = 800
 const WORLD_H = 600
@@ -35,6 +49,8 @@ export function getPlayerLimits(gameType: PartyRoomState['gameType']) {
       return { min: BOMBA_MIN, max: BOMBA_MAX }
     case 'no-piso':
       return { min: NO_PISO_MIN, max: NO_PISO_MAX }
+    case 'mentiroso':
+      return { min: MENTIROSO_MIN, max: MENTIROSO_MAX }
   }
 }
 
@@ -109,9 +125,32 @@ function handlePlayerDisconnect(room: PartyRoomState, userId: string) {
   }
 }
 
+export async function addChatMessage(room: PartyRoomState, userId: string, text: string): Promise<PartyRoomState> {
+  const player = room.players.find((p) => p.userId === userId)
+  if (!player) {
+    throw createError({ statusCode: 403, statusMessage: 'No estás en esta sala' })
+  }
+
+  const message: PartyChatMessage = {
+    id: randomUUID(),
+    userId,
+    name: player.name,
+    text,
+    sentAt: Date.now(),
+  }
+
+  room.chatMessages = [...(room.chatMessages ?? []), message].slice(-CHAT_MAX_MESSAGES)
+  await saveRoom(room)
+  return room
+}
+
 export async function startGame(room: PartyRoomState, userId: string): Promise<PartyRoomState> {
   if (room.hostUserId !== userId) {
     throw createError({ statusCode: 403, statusMessage: 'Solo el anfitrión puede iniciar' })
+  }
+
+  if (room.status === 'playing') {
+    throw createError({ statusCode: 400, statusMessage: 'La partida ya está en curso' })
   }
 
   const limits = getPlayerLimits(room.gameType)
@@ -122,8 +161,33 @@ export async function startGame(room: PartyRoomState, userId: string): Promise<P
     })
   }
 
+  // Full reset so "play again" from a finished room starts clean, regardless
+  // of which game left players dead/frozen/scored from the previous match.
   room.status = 'playing'
   room.round = 1
+  room.winnerId = undefined
+  room.winnerName = undefined
+  room.message = undefined
+  room.roundResult = undefined
+  room.lastExplosion = undefined
+
+  for (const player of room.players) {
+    player.lives = 3
+    player.alive = true
+    player.clue = undefined
+    player.voteTargetId = undefined
+    player.guess = undefined
+    player.frozenUntil = undefined
+    player.shield = undefined
+    player.bluffAnswer = undefined
+    player.votedOptionId = undefined
+    player.points = 0
+    player.x = 100
+    player.y = 400
+    player.vx = 0
+    player.vy = 0
+    player.onGround = true
+  }
 
   switch (room.gameType) {
     case 'infiltrado':
@@ -134,6 +198,12 @@ export async function startGame(room: PartyRoomState, userId: string): Promise<P
       break
     case 'no-piso':
       startNoPisoGame(room)
+      break
+    case 'mentiroso':
+      room.round = 0
+      room.mentirosoTotalRounds = MENTIROSO_TOTAL_ROUNDS
+      room.mentirosoUsedQuestionIds = []
+      startMentirosoRound(room)
       break
   }
 
@@ -240,6 +310,111 @@ function generatePlatforms() {
   return platforms
 }
 
+function startMentirosoRound(room: PartyRoomState) {
+  room.round += 1
+  const used = room.mentirosoUsedQuestionIds ?? []
+  const question = pickRandomMentirosoQuestion(used)
+  room.mentirosoUsedQuestionIds = [...used, question.id]
+
+  room.mentirosoQuestionId = question.id
+  room.mentirosoPrompt = question.prompt
+  room.mentirosoRealAnswer = question.answer
+  room.mentirosoOptions = []
+  room.phase = 'mentiroso_answer'
+  room.phaseEndsAt = Date.now() + MENTIROSO_ANSWER_MS
+  room.message = `Ronda ${room.round}/${room.mentirosoTotalRounds ?? MENTIROSO_TOTAL_ROUNDS} — inventa una respuesta creíble`
+
+  for (const player of room.players) {
+    player.bluffAnswer = undefined
+    player.votedOptionId = undefined
+  }
+}
+
+function buildMentirosoOptions(room: PartyRoomState) {
+  const real = (room.mentirosoRealAnswer ?? '').trim()
+  const normalize = (s: string) => s.trim().toLowerCase()
+
+  const options: { id: string; text: string; authorId: string | null }[] = [
+    { id: 'real', text: real, authorId: null },
+  ]
+
+  for (const player of room.players) {
+    const bluff = player.bluffAnswer?.trim()
+    if (!bluff) continue
+    if (normalize(bluff) === normalize(real)) continue
+    options.push({ id: player.userId, text: bluff, authorId: player.userId })
+  }
+
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[options[i], options[j]] = [options[j]!, options[i]!]
+  }
+
+  room.mentirosoOptions = options
+}
+
+function advanceToMentirosoVoting(room: PartyRoomState) {
+  buildMentirosoOptions(room)
+  room.phase = 'mentiroso_voting'
+  room.phaseEndsAt = Date.now() + MENTIROSO_VOTING_MS
+  room.message = 'Vota cuál crees que es la respuesta real'
+}
+
+function resolveMentirosoVoting(room: PartyRoomState) {
+  const options = room.mentirosoOptions ?? []
+  const realOption = options.find((o) => o.authorId === null)
+
+  for (const player of room.players) {
+    if (realOption && player.votedOptionId === realOption.id) {
+      player.points = (player.points ?? 0) + MENTIROSO_CORRECT_POINTS
+    }
+  }
+
+  for (const option of options) {
+    if (!option.authorId) continue
+    const trickedCount = room.players.filter(
+      (p) => p.votedOptionId === option.id && p.userId !== option.authorId,
+    ).length
+    if (trickedCount === 0) continue
+    const author = room.players.find((p) => p.userId === option.authorId)
+    if (author) author.points = (author.points ?? 0) + trickedCount * MENTIROSO_TRICK_POINTS
+  }
+
+  room.phase = 'mentiroso_reveal'
+  room.phaseEndsAt = Date.now() + MENTIROSO_REVEAL_MS
+  room.message = `La respuesta real era: ${room.mentirosoRealAnswer}`
+}
+
+function finishMentiroso(room: PartyRoomState) {
+  const winner = [...room.players].sort((a, b) => (b.points ?? 0) - (a.points ?? 0))[0]
+  room.status = 'finished'
+  room.phase = 'finished'
+  room.winnerId = winner?.userId
+  room.winnerName = winner?.name
+  room.message = winner ? `🏆 ¡${winner.name} es el mejor mentiroso!` : 'Partida terminada.'
+}
+
+function tickMentiroso(room: PartyRoomState, now: number) {
+  if (room.phase === 'mentiroso_answer' && room.phaseEndsAt && now >= room.phaseEndsAt) {
+    advanceToMentirosoVoting(room)
+    return
+  }
+
+  if (room.phase === 'mentiroso_voting' && room.phaseEndsAt && now >= room.phaseEndsAt) {
+    resolveMentirosoVoting(room)
+    return
+  }
+
+  if (room.phase === 'mentiroso_reveal' && room.phaseEndsAt && now >= room.phaseEndsAt) {
+    const total = room.mentirosoTotalRounds ?? MENTIROSO_TOTAL_ROUNDS
+    if (room.round >= total) {
+      finishMentiroso(room)
+    } else {
+      startMentirosoRound(room)
+    }
+  }
+}
+
 export async function tickRoom(room: PartyRoomState, now = Date.now()): Promise<PartyRoomState> {
   const delta = Math.min(now - room.lastTickAt, 100)
   room.lastTickAt = now
@@ -260,6 +435,10 @@ export async function tickRoom(room: PartyRoomState, now = Date.now()): Promise<
 
   if (room.gameType === 'no-piso' && room.status === 'playing') {
     tickNoPiso(room, now, delta)
+  }
+
+  if (room.gameType === 'mentiroso' && room.status === 'playing') {
+    tickMentiroso(room, now)
   }
 
   room.updatedAt = now
@@ -427,6 +606,9 @@ export async function handleAction(
       break
     case 'no-piso':
       handleNoPisoAction(room, userId, action)
+      break
+    case 'mentiroso':
+      handleMentirosoAction(room, userId, action)
       break
   }
 
@@ -612,6 +794,44 @@ function handleNoPisoAction(room: PartyRoomState, userId: string, action: PartyG
   throw createError({ statusCode: 400, statusMessage: 'Acción no válida' })
 }
 
+function handleMentirosoAction(room: PartyRoomState, userId: string, action: PartyGameAction) {
+  const player = room.players.find((p) => p.userId === userId)
+  if (!player) {
+    throw createError({ statusCode: 403, statusMessage: 'No estás en esta sala' })
+  }
+
+  if (action.type === 'submit_answer' && room.phase === 'mentiroso_answer') {
+    if (player.bluffAnswer) {
+      throw createError({ statusCode: 400, statusMessage: 'Ya enviaste tu respuesta' })
+    }
+    player.bluffAnswer = action.text.trim()
+    if (room.players.every((p) => p.bluffAnswer)) {
+      advanceToMentirosoVoting(room)
+    }
+    return
+  }
+
+  if (action.type === 'vote_answer' && room.phase === 'mentiroso_voting') {
+    const option = room.mentirosoOptions?.find((o) => o.id === action.optionId)
+    if (!option) {
+      throw createError({ statusCode: 400, statusMessage: 'Opción inválida' })
+    }
+    if (option.authorId === userId) {
+      throw createError({ statusCode: 400, statusMessage: 'No puedes votar tu propia respuesta' })
+    }
+    if (player.votedOptionId) {
+      throw createError({ statusCode: 400, statusMessage: 'Ya votaste' })
+    }
+    player.votedOptionId = action.optionId
+    if (room.players.every((p) => p.votedOptionId)) {
+      resolveMentirosoVoting(room)
+    }
+    return
+  }
+
+  throw createError({ statusCode: 400, statusMessage: 'Acción no válida en esta fase' })
+}
+
 export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomView {
   const me = room.players.find((p) => p.userId === viewerId)
   const isInfiltrator = room.infiltratorId === viewerId
@@ -648,6 +868,9 @@ export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomVie
     winnerId: room.winnerId,
     winnerName: room.winnerName,
     roundResult: room.roundResult,
+    mentirosoPrompt: room.mentirosoPrompt,
+    mentirosoTotalRounds: room.mentirosoTotalRounds,
+    chatMessages: room.chatMessages ?? [],
     isInfiltrator,
     bombSecondsLeft,
     bombUrgent,
@@ -666,6 +889,31 @@ export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomVie
 
   if (room.phase === 'infiltrado_reveal' || room.phase === 'finished') {
     view.infiltratorId = room.infiltratorId
+  }
+
+  if (room.gameType === 'mentiroso') {
+    const revealed = room.phase === 'mentiroso_reveal' || room.phase === 'finished'
+
+    // Hide everyone else's bluff/vote so the reveal isn't spoiled by the raw player list.
+    view.players = room.players.map((p) => {
+      if (p.userId === viewerId || revealed) return { ...p }
+      return { ...p, bluffAnswer: undefined, votedOptionId: undefined }
+    })
+
+    if (revealed) {
+      view.mentirosoRealAnswer = room.mentirosoRealAnswer
+      view.mentirosoOptions = room.mentirosoOptions?.map((o) => ({
+        ...o,
+        votes: room.players.filter((p) => p.votedOptionId === o.id).length,
+        isMine: o.authorId === viewerId,
+      }))
+    } else {
+      view.mentirosoOptions = room.mentirosoOptions?.map((o) => ({
+        id: o.id,
+        text: o.text,
+        isMine: o.authorId === viewerId,
+      }))
+    }
   }
 
   return view

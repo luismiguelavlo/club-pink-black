@@ -125,6 +125,36 @@ export const GAMES: Game[] = [
     },
   },
   {
+    id: 'mentiroso',
+    title: 'MENTIROSO',
+    category: 'PARTY',
+    color: '#ffd166',
+    description: 'Inventa la respuesta más creíble y descubre quién te la creyó. 2-10 jugadores.',
+    mode: 'multiplayer',
+    emoji: '🤥',
+    minPlayers: 2,
+    maxPlayers: 10,
+    funRating: 5,
+    difficulty: 2,
+    guide: {
+      summary:
+        'Un juego de mentiras y trivia absurda. Cada ronda aparece una pregunta rara con la respuesta real oculta. Todos inventan una respuesta falsa pero creíble, luego votan cuál creen que es la verdadera. Ganas puntos por adivinar la real y por engañar a otros con tu mentira.',
+      steps: [
+        'Únete a la sala con 2-10 amigos.',
+        'Aparece una pregunta de trivia rara con un espacio en blanco.',
+        'Todos escriben la respuesta más creíble (o graciosa) que se les ocurra.',
+        'Las respuestas se mezclan y todos votan cuál creen que es la real.',
+        'Ganas 100 pts por acertar la real y 50 pts por cada persona que caiga con tu mentira.',
+        'Después de 6 rondas gana quien tenga más puntos.',
+      ],
+      rules: [
+        'No puedes votar tu propia respuesta.',
+        'No ves las respuestas de los demás hasta la votación (llegan mezcladas y anónimas).',
+        'Si escribes exactamente la respuesta real, no cuenta como mentira.',
+      ],
+    },
+  },
+  {
     id: 'party-chaos',
     title: 'PARTY CHAOS',
     category: 'PARTY',

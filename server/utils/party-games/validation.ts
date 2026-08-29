@@ -1,12 +1,16 @@
 import { z } from 'zod'
 
 export const createPartyRoomSchema = z.object({
-  gameType: z.enum(['infiltrado', 'bomba', 'no-piso']),
+  gameType: z.enum(['infiltrado', 'bomba', 'no-piso', 'mentiroso']),
 })
 
 export const joinPartyRoomSchema = z.object({
   code: z.string().trim().min(4).max(8),
-  gameType: z.enum(['infiltrado', 'bomba', 'no-piso']).optional(),
+  gameType: z.enum(['infiltrado', 'bomba', 'no-piso', 'mentiroso']).optional(),
+})
+
+export const partyChatMessageSchema = z.object({
+  text: z.string().trim().min(1).max(300),
 })
 
 export const partyGameActionSchema = z.discriminatedUnion('type', [
@@ -36,5 +40,13 @@ export const partyGameActionSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('jump'),
+  }),
+  z.object({
+    type: z.literal('submit_answer'),
+    text: z.string().trim().min(1).max(60),
+  }),
+  z.object({
+    type: z.literal('vote_answer'),
+    optionId: z.string().trim().min(1),
   }),
 ])

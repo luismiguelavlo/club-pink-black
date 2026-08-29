@@ -64,6 +64,8 @@ onUnmounted(() => {
 })
 
 function onKey(e: KeyboardEvent) {
+  const target = e.target as HTMLElement | null
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
   if (props.room.phase !== 'no_piso_playing' && props.room.phase !== 'no_piso_warning') return
   if (!props.room.me?.alive) return
 

@@ -393,7 +393,7 @@ export type VehicleDocument = typeof vehicleDocuments.$inferSelect
 export type NewVehicleDocument = typeof vehicleDocuments.$inferInsert
 export type VehicleDocumentKind = 'soat' | 'tecnomecanica' | 'taxes' | 'insurance' | 'license' | 'other'
 
-export const partyGameTypeEnum = pgEnum('party_game_type', ['infiltrado', 'bomba', 'no-piso'])
+export const partyGameTypeEnum = pgEnum('party_game_type', ['infiltrado', 'bomba', 'no-piso', 'mentiroso'])
 
 export const partyRooms = pgTable('party_rooms', {
   code: text('code').primaryKey(),
