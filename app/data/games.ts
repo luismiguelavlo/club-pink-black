@@ -184,6 +184,36 @@ export const GAMES: Game[] = [
     },
   },
   {
+    id: 'hockey-aire',
+    title: 'HOCKEY DE AIRE',
+    category: 'PARTY',
+    color: '#ff4d94',
+    description: 'Duelo 1 vs 1 en el mismo celular. Mete el disco en la portería contraria.',
+    mode: 'local',
+    emoji: '🏒',
+    minPlayers: 2,
+    maxPlayers: 2,
+    funRating: 5,
+    difficulty: 3,
+    guide: {
+      summary:
+        'Un air hockey para dos personas sobre un solo celular. Pongan el teléfono en la mesa, uno se sienta a cada extremo y cada quien arrastra su mazo con el dedo dentro de su mitad. Gana el primero en llegar a los goles acordados.',
+      steps: [
+        'Elige cuántos goles se necesitan para ganar: 3, 5 o 7.',
+        'Apoya el celular en la mesa entre los dos jugadores.',
+        'El Jugador 1 controla la mitad de abajo y el Jugador 2 la de arriba.',
+        'Arrastra tu mazo con el dedo para golpear el disco.',
+        'Mete el disco en la portería contraria hasta llegar al marcador objetivo.',
+      ],
+      rules: [
+        'Cada mazo solo puede moverse dentro de su propia mitad.',
+        'Ambos jugadores pueden tocar la pantalla al mismo tiempo.',
+        'Mientras más rápido muevas el mazo, más fuerte sale el disparo.',
+        'En computadora: Jugador 1 con las flechas y Jugador 2 con W A S D.',
+      ],
+    },
+  },
+  {
     id: 'reto-o-pierdes',
     title: 'EL RETO O PIERDES',
     category: 'PARTY',

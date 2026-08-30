@@ -1,9 +1,10 @@
-import { eq } from 'drizzle-orm'
+import { and, desc, eq, gt } from 'drizzle-orm'
 import type { PartyRoomState } from '#shared/types/party-games'
 import { useDb } from '../db'
 import { partyRooms } from '../../database/schema'
 
 const ROOM_TTL_MS = 2 * 60 * 60 * 1000
+const ROOM_LIST_LIMIT = 50
 
 export async function getRoom(code: string): Promise<PartyRoomState | undefined> {
   const upper = code.toUpperCase()
@@ -43,6 +44,26 @@ export async function saveRoom(room: PartyRoomState): Promise<void> {
 export async function deleteRoom(code: string): Promise<void> {
   const db = useDb()
   await db.delete(partyRooms).where(eq(partyRooms.code, code.toUpperCase()))
+}
+
+/**
+ * Rooms that are still within their TTL, newest activity first. Expired rows are
+ * left for `getRoom` to reap so listing stays a plain read.
+ */
+export async function listActiveRooms(
+  gameType?: PartyRoomState['gameType'],
+): Promise<PartyRoomState[]> {
+  const db = useDb()
+  const notExpired = gt(partyRooms.expiresAt, new Date())
+
+  const rows = await db
+    .select({ state: partyRooms.state })
+    .from(partyRooms)
+    .where(gameType ? and(notExpired, eq(partyRooms.gameType, gameType)) : notExpired)
+    .orderBy(desc(partyRooms.updatedAt))
+    .limit(ROOM_LIST_LIMIT)
+
+  return rows.map((row) => row.state)
 }
 
 function generateRoomCode(): string {

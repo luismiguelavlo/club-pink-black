@@ -2,6 +2,7 @@
 import { getGameById } from '~/data/games'
 import type { MobileControlLayout } from '~/components/games/GameMobileControls.vue'
 import type { LocalGameId } from '~/types/party-chaos'
+import type { PartyGameId } from '#shared/types/party-games'
 
 definePageMeta({
   layout: 'members',
@@ -18,6 +19,13 @@ if (!game) {
 
 const isMultiplayer = game.mode === 'multiplayer'
 const isLocal = game.mode === 'local'
+const partyGameType = gameId as PartyGameId
+
+const playersLabel = computed(() =>
+  game.minPlayers === game.maxPlayers
+    ? `${game.maxPlayers} jugadores`
+    : `${game.minPlayers}-${game.maxPlayers} jugadores`,
+)
 
 useSeoMeta({
   title: `${game.title} | Pink & Black`,
@@ -143,6 +151,10 @@ const showMobileControls = computed(
             :game="game"
             @created="onRoomCreated"
           />
+          <PartyRoomsBrowser
+            :game-type="partyGameType"
+            :title="`Salas de ${game.title}`"
+          />
         </div>
       </template>
 
@@ -161,34 +173,50 @@ const showMobileControls = computed(
               {{ game.emoji }} {{ game.title }}
             </h1>
             <p class="font-label-sm text-label-sm uppercase text-primary">
-              Pasa el celular · {{ game.minPlayers }}-{{ game.maxPlayers }} jugadores
+              Pasa el celular · {{ playersLabel }}
             </p>
           </div>
         </div>
 
-        <PartyChaosSetup
-          v-if="localPhase === 'setup'"
-          :game="game"
-          :show-config="gameId === 'party-chaos'"
-          @start="onLocalStart"
-        />
+        <!-- Real-time local game: no player roster needed -->
+        <div
+          v-if="gameId === 'hockey-aire'"
+          class="mx-auto max-w-xl space-y-6"
+        >
+          <PartyGameGuide
+            v-if="game.guide"
+            :guide="game.guide"
+            :emoji="game.emoji"
+            :title="game.title"
+          />
+          <AirHockeyGame @finish="goBack" />
+        </div>
 
-        <RetoOPierdesGame
-          v-else-if="gameId === 'reto-o-pierdes'"
-          @finish="onLocalFinish"
-        />
-        <NoTeRiasGame
-          v-else-if="gameId === 'no-te-rias'"
-          @finish="onLocalFinish"
-        />
-        <CerebroGrupoGame
-          v-else-if="gameId === 'cerebro-grupo'"
-          @finish="onLocalFinish"
-        />
-        <PartyChaosMixed
-          v-else-if="gameId === 'party-chaos'"
-          @finish="onLocalFinish"
-        />
+        <template v-else>
+          <PartyChaosSetup
+            v-if="localPhase === 'setup'"
+            :game="game"
+            :show-config="gameId === 'party-chaos'"
+            @start="onLocalStart"
+          />
+
+          <RetoOPierdesGame
+            v-else-if="gameId === 'reto-o-pierdes'"
+            @finish="onLocalFinish"
+          />
+          <NoTeRiasGame
+            v-else-if="gameId === 'no-te-rias'"
+            @finish="onLocalFinish"
+          />
+          <CerebroGrupoGame
+            v-else-if="gameId === 'cerebro-grupo'"
+            @finish="onLocalFinish"
+          />
+          <PartyChaosMixed
+            v-else-if="gameId === 'party-chaos'"
+            @finish="onLocalFinish"
+          />
+        </template>
       </template>
 
       <!-- Solo arcade games -->

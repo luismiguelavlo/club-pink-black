@@ -4,6 +4,7 @@ import type {
   PartyGameAction,
   PartyPlayer,
   PartyRoomState,
+  PartyRoomSummary,
   PartyRoomView,
 } from '#shared/types/party-games'
 import { pickRandomWord } from './words'
@@ -54,12 +55,26 @@ export function getPlayerLimits(gameType: PartyRoomState['gameType']) {
   }
 }
 
+/** Players taking part in the current match, ignoring anyone waiting for the next one. */
+function matchPlayers(room: PartyRoomState): PartyPlayer[] {
+  return room.players.filter((p) => !p.waiting)
+}
+
+function assertNotWaiting(player: PartyPlayer) {
+  if (player.waiting) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Entras en la próxima partida. Mientras tanto puedes usar el chat.',
+    })
+  }
+}
+
 export async function addPlayerToRoom(
   room: PartyRoomState,
   user: { id: string; name: string; avatarUrl: string | null },
 ): Promise<PartyRoomState> {
-  if (room.status !== 'lobby') {
-    throw createError({ statusCode: 400, statusMessage: 'La partida ya comenzó' })
+  if (room.players.some((p) => p.userId === user.id)) {
+    return room
   }
 
   const limits = getPlayerLimits(room.gameType)
@@ -67,9 +82,9 @@ export async function addPlayerToRoom(
     throw createError({ statusCode: 400, statusMessage: 'La sala está llena' })
   }
 
-  if (room.players.some((p) => p.userId === user.id)) {
-    return room
-  }
+  // Joining while a match runs is allowed: the player watches and chats now,
+  // and `startGame` promotes them for the next match.
+  const waiting = room.status !== 'lobby'
 
   const color = PLAYER_COLORS[room.players.length % PLAYER_COLORS.length]!
   room.players.push({
@@ -77,7 +92,8 @@ export async function addPlayerToRoom(
     name: user.name,
     avatarUrl: user.avatarUrl,
     lives: 3,
-    alive: true,
+    alive: !waiting,
+    waiting,
     isHost: false,
     x: 80 + room.players.length * 60,
     y: 400,
@@ -109,6 +125,14 @@ export async function removePlayerFromRoom(room: PartyRoomState, userId: string)
 
   if (room.status === 'playing') {
     handlePlayerDisconnect(room, userId)
+
+    // Everyone who was actually playing left. End the match so the people who
+    // joined mid-game can start a new one instead of watching an empty room.
+    if (matchPlayers(room).length === 0) {
+      room.status = 'finished'
+      room.phase = 'finished'
+      room.message = 'La partida terminó porque los jugadores salieron.'
+    }
   }
 
   await saveRoom(room)
@@ -172,6 +196,7 @@ export async function startGame(room: PartyRoomState, userId: string): Promise<P
   room.lastExplosion = undefined
 
   for (const player of room.players) {
+    player.waiting = false
     player.lives = 3
     player.alive = true
     player.clue = undefined
@@ -338,7 +363,7 @@ function buildMentirosoOptions(room: PartyRoomState) {
     { id: 'real', text: real, authorId: null },
   ]
 
-  for (const player of room.players) {
+  for (const player of matchPlayers(room)) {
     const bluff = player.bluffAnswer?.trim()
     if (!bluff) continue
     if (normalize(bluff) === normalize(real)) continue
@@ -363,8 +388,9 @@ function advanceToMentirosoVoting(room: PartyRoomState) {
 function resolveMentirosoVoting(room: PartyRoomState) {
   const options = room.mentirosoOptions ?? []
   const realOption = options.find((o) => o.authorId === null)
+  const contenders = matchPlayers(room)
 
-  for (const player of room.players) {
+  for (const player of contenders) {
     if (realOption && player.votedOptionId === realOption.id) {
       player.points = (player.points ?? 0) + MENTIROSO_CORRECT_POINTS
     }
@@ -372,11 +398,11 @@ function resolveMentirosoVoting(room: PartyRoomState) {
 
   for (const option of options) {
     if (!option.authorId) continue
-    const trickedCount = room.players.filter(
+    const trickedCount = contenders.filter(
       (p) => p.votedOptionId === option.id && p.userId !== option.authorId,
     ).length
     if (trickedCount === 0) continue
-    const author = room.players.find((p) => p.userId === option.authorId)
+    const author = contenders.find((p) => p.userId === option.authorId)
     if (author) author.points = (author.points ?? 0) + trickedCount * MENTIROSO_TRICK_POINTS
   }
 
@@ -386,7 +412,7 @@ function resolveMentirosoVoting(room: PartyRoomState) {
 }
 
 function finishMentiroso(room: PartyRoomState) {
-  const winner = [...room.players].sort((a, b) => (b.points ?? 0) - (a.points ?? 0))[0]
+  const winner = [...matchPlayers(room)].sort((a, b) => (b.points ?? 0) - (a.points ?? 0))[0]
   room.status = 'finished'
   room.phase = 'finished'
   room.winnerId = winner?.userId
@@ -531,8 +557,9 @@ function tickNoPiso(room: PartyRoomState, now: number, delta: number) {
 
   simulateNoPisoPhysics(room, delta)
 
-  const alive = room.players.filter((p) => p.alive)
-  if (alive.length <= 1 && room.players.filter((p) => p.lives > 0 || p.alive).length > 1) {
+  const contenders = matchPlayers(room)
+  const alive = contenders.filter((p) => p.alive)
+  if (alive.length <= 1 && contenders.length > 1) {
     const winner = alive[0]
     room.status = 'finished'
     room.phase = 'finished'
@@ -621,6 +648,7 @@ function handleInfiltradoAction(room: PartyRoomState, userId: string, action: Pa
   if (!player) {
     throw createError({ statusCode: 403, statusMessage: 'No estás en esta sala' })
   }
+  assertNotWaiting(player)
 
   if (action.type === 'submit_clue' && room.phase === 'infiltrado_clues') {
     const clue = action.clue.trim()
@@ -636,7 +664,7 @@ function handleInfiltradoAction(room: PartyRoomState, userId: string, action: Pa
   }
 
   if (action.type === 'vote' && room.phase === 'infiltrado_voting') {
-    if (!room.players.some((p) => p.userId === action.targetUserId)) {
+    if (!matchPlayers(room).some((p) => p.userId === action.targetUserId)) {
       throw createError({ statusCode: 400, statusMessage: 'Jugador inválido' })
     }
     if (action.targetUserId === userId) {
@@ -719,6 +747,7 @@ function handleBombaAction(room: PartyRoomState, userId: string, action: PartyGa
   }
 
   const player = room.players.find((p) => p.userId === userId)
+  if (player) assertNotWaiting(player)
   if (!player?.alive) {
     throw createError({ statusCode: 403, statusMessage: 'No puedes actuar' })
   }
@@ -776,6 +805,7 @@ function handleNoPisoAction(room: PartyRoomState, userId: string, action: PartyG
   }
 
   const player = room.players.find((p) => p.userId === userId)
+  if (player) assertNotWaiting(player)
   if (!player?.alive) {
     throw createError({ statusCode: 403, statusMessage: 'Ya fuiste eliminado' })
   }
@@ -799,13 +829,14 @@ function handleMentirosoAction(room: PartyRoomState, userId: string, action: Par
   if (!player) {
     throw createError({ statusCode: 403, statusMessage: 'No estás en esta sala' })
   }
+  assertNotWaiting(player)
 
   if (action.type === 'submit_answer' && room.phase === 'mentiroso_answer') {
     if (player.bluffAnswer) {
       throw createError({ statusCode: 400, statusMessage: 'Ya enviaste tu respuesta' })
     }
     player.bluffAnswer = action.text.trim()
-    if (room.players.every((p) => p.bluffAnswer)) {
+    if (matchPlayers(room).every((p) => p.bluffAnswer)) {
       advanceToMentirosoVoting(room)
     }
     return
@@ -823,7 +854,7 @@ function handleMentirosoAction(room: PartyRoomState, userId: string, action: Par
       throw createError({ statusCode: 400, statusMessage: 'Ya votaste' })
     }
     player.votedOptionId = action.optionId
-    if (room.players.every((p) => p.votedOptionId)) {
+    if (matchPlayers(room).every((p) => p.votedOptionId)) {
       resolveMentirosoVoting(room)
     }
     return
@@ -832,9 +863,33 @@ function handleMentirosoAction(room: PartyRoomState, userId: string, action: Par
   throw createError({ statusCode: 400, statusMessage: 'Acción no válida en esta fase' })
 }
 
+export function toRoomSummary(room: PartyRoomState, viewerId: string): PartyRoomSummary {
+  const limits = getPlayerLimits(room.gameType)
+  const playerCount = matchPlayers(room).length
+
+  return {
+    code: room.code,
+    gameType: room.gameType,
+    status: room.status,
+    hostName: room.players.find((p) => p.userId === room.hostUserId)?.name ?? 'Anfitrión',
+    round: room.round,
+    playerCount,
+    waitingCount: room.players.length - playerCount,
+    minPlayers: limits.min,
+    maxPlayers: limits.max,
+    full: room.players.length >= limits.max,
+    imIn: room.players.some((p) => p.userId === viewerId),
+    createdAt: room.createdAt,
+    updatedAt: room.updatedAt,
+  }
+}
+
 export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomView {
   const me = room.players.find((p) => p.userId === viewerId)
   const isInfiltrator = room.infiltratorId === viewerId
+  // Spectators waiting for the next match must not receive hidden info they
+  // could leak in chat, and game panels should not render them as contenders.
+  const isWaiting = me?.waiting === true
 
   let bombSecondsLeft: number | null = null
   let bombUrgent = false
@@ -851,7 +906,8 @@ export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomVie
     status: room.status,
     phase: room.phase,
     round: room.round,
-    players: room.players.map((p) => ({ ...p })),
+    players: matchPlayers(room).map((p) => ({ ...p })),
+    waitingPlayers: room.players.filter((p) => p.waiting).map((p) => ({ ...p })),
     createdAt: room.createdAt,
     updatedAt: room.updatedAt,
     lastTickAt: room.lastTickAt,
@@ -878,7 +934,7 @@ export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomVie
   }
 
   if (room.gameType === 'infiltrado' && room.status === 'playing') {
-    if (!isInfiltrator && room.phase !== 'infiltrado_reveal' && room.phase !== 'finished') {
+    if (!isInfiltrator && !isWaiting && room.phase !== 'infiltrado_reveal' && room.phase !== 'finished') {
       view.secretWord = room.secretWord
     }
     if (room.phase === 'infiltrado_reveal' || room.phase === 'finished') {
@@ -895,7 +951,7 @@ export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomVie
     const revealed = room.phase === 'mentiroso_reveal' || room.phase === 'finished'
 
     // Hide everyone else's bluff/vote so the reveal isn't spoiled by the raw player list.
-    view.players = room.players.map((p) => {
+    view.players = matchPlayers(room).map((p) => {
       if (p.userId === viewerId || revealed) return { ...p }
       return { ...p, bluffAnswer: undefined, votedOptionId: undefined }
     })

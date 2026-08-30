@@ -24,6 +24,11 @@ export interface PartyPlayer {
   lives: number
   alive: boolean
   isHost: boolean
+  /**
+   * Joined while a match was already running, so they sit out the current one
+   * and are promoted to a regular player when the next match starts.
+   */
+  waiting?: boolean
   clue?: string
   voteTargetId?: string
   guess?: string
@@ -117,6 +122,26 @@ export type PartyRoomView = Omit<
   mentirosoRealAnswer?: string
   mentirosoOptions?: (Omit<MentirosoOption, 'authorId'> & { authorId?: string | null; votes?: number; isMine?: boolean })[]
   me?: PartyPlayer
+  /** Joined mid-match; they chat now and are promoted when the next match starts. */
+  waitingPlayers: PartyPlayer[]
+}
+
+export interface PartyRoomSummary {
+  code: string
+  gameType: PartyGameId
+  status: PartyRoomStatus
+  hostName: string
+  round: number
+  /** Players taking part in the current match. */
+  playerCount: number
+  /** Players who joined mid-match and start playing on the next one. */
+  waitingCount: number
+  minPlayers: number
+  maxPlayers: number
+  full: boolean
+  imIn: boolean
+  createdAt: number
+  updatedAt: number
 }
 
 export type PartyGameAction =

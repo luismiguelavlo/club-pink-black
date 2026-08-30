@@ -44,6 +44,10 @@ const getCategoryColor = (category: string) => {
       </div>
 
       <div class="mb-10">
+        <PartyRoomsBrowser title="Salas en vivo" />
+      </div>
+
+      <div class="mb-10">
         <h2 class="mb-4 flex items-center gap-2 font-headline-lg text-2xl text-on-surface">
           <MaterialIcon
             name="smartphone"

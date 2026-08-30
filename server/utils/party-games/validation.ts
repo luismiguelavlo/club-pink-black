@@ -9,6 +9,10 @@ export const joinPartyRoomSchema = z.object({
   gameType: z.enum(['infiltrado', 'bomba', 'no-piso', 'mentiroso']).optional(),
 })
 
+export const listPartyRoomsSchema = z.object({
+  gameType: z.enum(['infiltrado', 'bomba', 'no-piso', 'mentiroso']).optional(),
+})
+
 export const partyChatMessageSchema = z.object({
   text: z.string().trim().min(1).max(300),
 })

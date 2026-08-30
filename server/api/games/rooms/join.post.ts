@@ -40,6 +40,7 @@ export default defineEventHandler(async (event) => {
       status: room.status,
       playerCount: room.players.length,
       limits,
+      waiting: room.players.find((p) => p.userId === session.user.id)?.waiting ?? false,
     },
   }
 })

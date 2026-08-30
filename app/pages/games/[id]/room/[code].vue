@@ -28,6 +28,7 @@ const notInRoom = computed(() => errorStatus.value === 403)
 
 const { user } = useUserSession()
 const isHost = computed(() => room.value?.hostUserId === user.value?.id)
+const isWaiting = computed(() => room.value?.me?.waiting === true)
 
 const joining = ref(false)
 const joinError = ref<string | null>(null)
@@ -195,6 +196,12 @@ onBeforeUnmount(() => {
           @start="handleStart"
         />
 
+        <PartyWaitingRoom
+          v-else-if="isWaiting"
+          :room="room"
+          :game="game"
+        />
+
         <InfiltradoPanel
           v-else-if="gameId === 'infiltrado'"
           :room="room"
@@ -220,7 +227,7 @@ onBeforeUnmount(() => {
         />
 
         <div
-          v-if="room.status === 'finished'"
+          v-if="room.status === 'finished' && (isHost || !isWaiting)"
           class="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-6 text-center"
         >
           <p
