@@ -500,37 +500,50 @@ const editingPost = computed(() =>
             </button>
           </div>
 
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="space-y-4">
             <div>
-              <label
-                for="sw-video-url"
-                class="mb-2 block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant"
-              >
-                Video YouTube o TikTok (URL)
-              </label>
-              <input
-                id="sw-video-url"
-                v-model="videoUrl"
-                type="url"
-                class="w-full rounded-lg border border-outline-variant/20 bg-surface-container-high px-4 py-3 text-on-surface focus:border-primary/50 focus:outline-none"
-                placeholder="https://youtube.com/... o https://tiktok.com/..."
-              >
+              <h3 class="mb-1 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
+                Videos (YouTube o TikTok)
+              </h3>
+              <p class="text-sm text-on-surface-variant">
+                Agrega uno o más videos pegando el enlace público desde cualquiera de las dos plataformas.
+              </p>
             </div>
-            <div>
-              <label
-                for="sw-video-title"
-                class="mb-2 block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant"
-              >
-                Título del video (opcional)
-              </label>
-              <input
-                id="sw-video-title"
-                v-model="videoTitle"
-                type="text"
-                maxlength="160"
-                class="w-full rounded-lg border border-outline-variant/20 bg-surface-container-high px-4 py-3 text-on-surface focus:border-primary/50 focus:outline-none"
-                placeholder="Resumen del video"
-              >
+
+            <ExternalVideoLinkHint compact />
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label
+                  for="sw-video-url"
+                  class="mb-2 block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant"
+                >
+                  Enlace del video
+                </label>
+                <input
+                  id="sw-video-url"
+                  v-model="videoUrl"
+                  type="url"
+                  class="w-full rounded-lg border border-outline-variant/20 bg-surface-container-high px-4 py-3 text-on-surface focus:border-primary/50 focus:outline-none"
+                  placeholder="https://youtube.com/... o https://tiktok.com/..."
+                >
+              </div>
+              <div>
+                <label
+                  for="sw-video-title"
+                  class="mb-2 block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant"
+                >
+                  Título del video (opcional)
+                </label>
+                <input
+                  id="sw-video-title"
+                  v-model="videoTitle"
+                  type="text"
+                  maxlength="160"
+                  class="w-full rounded-lg border border-outline-variant/20 bg-surface-container-high px-4 py-3 text-on-surface focus:border-primary/50 focus:outline-none"
+                  placeholder="Resumen del video"
+                >
+              </div>
             </div>
           </div>
 
@@ -602,7 +615,7 @@ const editingPost = computed(() =>
 
           <div v-if="editingPost.videos.length">
             <h3 class="mb-3 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
-              Videos actuales
+              Videos actuales (YouTube o TikTok)
             </h3>
             <div class="space-y-3">
               <div
@@ -616,9 +629,21 @@ const editingPost = computed(() =>
                     :style="{ backgroundImage: `url('${video.thumbnailUrl}')` }"
                   />
                   <div class="min-w-0">
-                    <p class="truncate text-sm font-medium text-on-surface">
-                      {{ video.title || `Video de ${videoProviderLabel(video.videoProvider)}` }}
-                    </p>
+                    <div class="flex items-center gap-2">
+                      <p class="truncate text-sm font-medium text-on-surface">
+                        {{ video.title || `Video de ${videoProviderLabel(video.videoProvider)}` }}
+                      </p>
+                      <span
+                        class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase"
+                        :class="
+                          video.videoProvider === 'tiktok'
+                            ? 'bg-[#25F4EE]/15 text-[#25F4EE]'
+                            : 'bg-[#FF0000]/15 text-[#FF0000]'
+                        "
+                      >
+                        {{ videoProviderLabel(video.videoProvider) }}
+                      </span>
+                    </div>
                     <p class="truncate text-xs text-on-surface-variant">
                       {{ video.youtubeUrl }}
                     </p>

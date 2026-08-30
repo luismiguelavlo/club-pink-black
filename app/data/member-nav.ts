@@ -19,6 +19,18 @@ const memberNav: MemberNavItem[] = [
     match: (path) => path.startsWith('/feed'),
   },
   {
+    label: 'Marketplace',
+    href: '/marketplace',
+    icon: 'storefront',
+    match: (path) => path.startsWith('/marketplace'),
+  },
+  {
+    label: 'Mensajes',
+    href: '/messages',
+    icon: 'chat',
+    match: (path) => path.startsWith('/messages'),
+  },
+  {
     label: 'Miembros',
     href: '/members',
     icon: 'groups',

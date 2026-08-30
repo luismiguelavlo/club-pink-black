@@ -271,10 +271,21 @@ async function removeItem(item: MediaItem) {
             </button>
             <button
               type="button"
-              class="rounded-lg border border-outline-variant/40 px-8 py-3 font-label-sm text-on-surface transition-all hover:border-primary hover:text-primary"
+              class="flex flex-col items-center gap-2 rounded-lg border border-outline-variant/40 px-8 py-3 font-label-sm text-on-surface transition-all hover:border-primary hover:text-primary"
               @click="youtubeOpen = true"
             >
-              AGREGAR YOUTUBE
+              <span class="flex items-center gap-2">
+                <MaterialIcon
+                  name="link"
+                  class="text-base"
+                />
+                AGREGAR VIDEO
+              </span>
+              <span class="flex items-center gap-2 text-[10px] font-normal normal-case tracking-normal text-on-surface-variant">
+                <span class="rounded px-1.5 py-0.5 bg-[#FF0000]/15 text-[#FF0000]">YouTube</span>
+                <span>o</span>
+                <span class="rounded px-1.5 py-0.5 bg-[#25F4EE]/15 text-[#25F4EE]">TikTok</span>
+              </span>
             </button>
           </div>
 
@@ -454,7 +465,12 @@ async function removeItem(item: MediaItem) {
             />
           </div>
           <span class="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface">
-            SUBIR MÁS
+            AGREGAR VIDEO
+          </span>
+          <span class="mt-1 flex items-center gap-1 text-[9px] normal-case tracking-normal text-on-surface-variant">
+            <span class="text-[#FF0000]">YouTube</span>
+            <span>·</span>
+            <span class="text-[#25F4EE]">TikTok</span>
           </span>
         </button>
       </div>

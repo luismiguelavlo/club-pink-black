@@ -12,6 +12,8 @@ export const notificationTypeEnum = pgEnum('notification_type', [
   'rsvp',
   'system',
   'maintenance',
+  'message',
+  'marketplace',
 ])
 
 export const vehicleStatusEnum = pgEnum('vehicle_status', ['active', 'sold', 'inactive'])
@@ -392,6 +394,71 @@ export type NewMaintenanceReminder = typeof maintenanceReminders.$inferInsert
 export type VehicleDocument = typeof vehicleDocuments.$inferSelect
 export type NewVehicleDocument = typeof vehicleDocuments.$inferInsert
 export type VehicleDocumentKind = 'soat' | 'tecnomecanica' | 'taxes' | 'insurance' | 'license' | 'other'
+
+export const marketplaceListingStatusEnum = pgEnum('marketplace_listing_status', ['active', 'sold', 'archived'])
+
+export const marketplaceListings = pgTable('marketplace_listings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  sellerId: uuid('seller_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  priceLabel: text('price_label'),
+  status: marketplaceListingStatusEnum('status').notNull().default('active'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const marketplaceListingImages = pgTable('marketplace_listing_images', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  listingId: uuid('listing_id')
+    .notNull()
+    .references(() => marketplaceListings.id, { onDelete: 'cascade' }),
+  imageUrl: text('image_url').notNull(),
+  cloudinaryPublicId: text('cloudinary_public_id').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  bytes: integer('bytes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const conversations = pgTable(
+  'conversations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    participantAId: uuid('participant_a_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    participantBId: uuid('participant_b_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    listingId: uuid('listing_id').references(() => marketplaceListings.id, { onDelete: 'set null' }),
+    lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('conversations_participants_idx').on(table.participantAId, table.participantBId),
+  ],
+)
+
+export const directMessages = pgTable('direct_messages', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  conversationId: uuid('conversation_id')
+    .notNull()
+    .references(() => conversations.id, { onDelete: 'cascade' }),
+  senderId: uuid('sender_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  body: text('body').notNull(),
+  readAt: timestamp('read_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export type MarketplaceListing = typeof marketplaceListings.$inferSelect
+export type MarketplaceListingImage = typeof marketplaceListingImages.$inferSelect
+export type MarketplaceListingStatus = 'active' | 'sold' | 'archived'
+export type Conversation = typeof conversations.$inferSelect
+export type DirectMessage = typeof directMessages.$inferSelect
 
 export const partyGameTypeEnum = pgEnum('party_game_type', ['infiltrado', 'bomba', 'no-piso', 'mentiroso'])
 

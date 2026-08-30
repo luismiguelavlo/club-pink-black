@@ -47,13 +47,15 @@ async function onSubmit() {
 <template>
   <AdminModal
     v-model:open="open"
-    title="Agregar video"
-    description="Pega un enlace de YouTube o TikTok. No se sube el archivo; solo se guarda el link."
+    title="Agregar video (YouTube o TikTok)"
+    description="Copia y pega el enlace del video desde cualquiera de las dos plataformas."
   >
     <form
       class="space-y-8"
       @submit.prevent="onSubmit"
     >
+      <ExternalVideoLinkHint compact />
+
       <FloatingLabelInput
         id="video-title"
         v-model="title"
@@ -64,14 +66,10 @@ async function onSubmit() {
         id="video-url"
         v-model="videoUrl"
         type="url"
-        label="URL de YouTube o TikTok"
+        label="Enlace del video"
         autocomplete="off"
         required
       />
-
-      <p class="font-label-sm text-[11px] text-on-surface-variant">
-        Ejemplos: youtube.com/watch?v=…, youtu.be/…, tiktok.com/@usuario/video/…, vm.tiktok.com/…
-      </p>
 
       <p
         v-if="errorMessage"
