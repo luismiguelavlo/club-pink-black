@@ -218,36 +218,6 @@ export const GAMES: Game[] = [
     },
   },
   {
-    id: 'hockey-aire-online',
-    title: 'HOCKEY DE AIRE ONLINE',
-    category: 'PARTY',
-    color: '#ff4d94',
-    description: 'Duelo 1 vs 1 online. Cada jugador en su celular, sala con código.',
-    mode: 'multiplayer',
-    emoji: '🏒',
-    minPlayers: 2,
-    maxPlayers: 2,
-    funRating: 5,
-    difficulty: 3,
-    guide: {
-      summary:
-        'Air hockey para dos jugadores en celulares distintos. Crea una sala, comparte el código y juega en tiempo real. Cada uno controla su mazo en su mitad de la mesa; gana quien llegue primero a 5 goles.',
-      steps: [
-        'Un jugador crea la sala y comparte el código con su rival.',
-        'Ambos entran desde sus celulares y el anfitrión pulsa Iniciar.',
-        'Arrastra el dedo en tu mitad de la pantalla para mover el mazo.',
-        'Golpea el disco hacia la portería contraria.',
-        'El primero en llegar a 5 goles gana la partida.',
-      ],
-      rules: [
-        'Exactamente 2 jugadores por sala.',
-        'Solo puedes mover el mazo en tu mitad del campo.',
-        'Si un jugador se desconecta, gana el otro.',
-        'En computadora puedes usar las flechas o WASD.',
-      ],
-    },
-  },
-  {
     id: 'hockey-aire',
     title: 'HOCKEY DE AIRE',
     category: 'PARTY',

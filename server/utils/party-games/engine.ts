@@ -10,18 +10,6 @@ import type {
 import { pickRandomWord } from './words'
 import { pickRandomMentirosoQuestion } from './mentiroso-questions'
 import { saveRoom } from './store'
-import {
-  AH_FIELD_H,
-  AH_FIELD_W,
-  AH_GOAL_PAUSE_MS,
-  clampBottomMallet,
-  clampTopMallet,
-  createInitialState,
-  goalToScorer,
-  servePuck,
-  simulateAirHockeyStep,
-  type AirHockeySimState,
-} from '#shared/utils/air-hockey-physics'
 
 const CHAT_MAX_MESSAGES = 50
 
@@ -38,9 +26,6 @@ const NO_PISO_MAX = 8
 
 const MENTIROSO_MIN = 2
 const MENTIROSO_MAX = 10
-const HOCKEY_MIN = 2
-const HOCKEY_MAX = 2
-const HOCKEY_DEFAULT_TARGET = 5
 const MENTIROSO_TOTAL_ROUNDS = 6
 const MENTIROSO_ANSWER_MS = 45_000
 const MENTIROSO_VOTING_MS = 30_000
@@ -67,8 +52,6 @@ export function getPlayerLimits(gameType: PartyRoomState['gameType']) {
       return { min: NO_PISO_MIN, max: NO_PISO_MAX }
     case 'mentiroso':
       return { min: MENTIROSO_MIN, max: MENTIROSO_MAX }
-    case 'hockey-aire-online':
-      return { min: HOCKEY_MIN, max: HOCKEY_MAX }
   }
 }
 
@@ -164,13 +147,6 @@ function handlePlayerDisconnect(room: PartyRoomState, userId: string) {
       armBomb(room)
     }
   }
-
-  if (room.gameType === 'hockey-aire-online' && room.status === 'playing') {
-    const remaining = matchPlayers(room).filter((p) => p.userId !== userId && p.alive)
-    if (remaining.length === 1) {
-      endAirHockeyGame(room, remaining[0])
-    }
-  }
 }
 
 export async function addChatMessage(room: PartyRoomState, userId: string, text: string): Promise<PartyRoomState> {
@@ -253,9 +229,6 @@ export async function startGame(room: PartyRoomState, userId: string): Promise<P
       room.mentirosoTotalRounds = MENTIROSO_TOTAL_ROUNDS
       room.mentirosoUsedQuestionIds = []
       startMentirosoRound(room)
-      break
-    case 'hockey-aire-online':
-      startAirHockeyGame(room)
       break
   }
 
@@ -494,10 +467,6 @@ export async function tickRoom(room: PartyRoomState, now = Date.now()): Promise<
     tickMentiroso(room, now)
   }
 
-  if (room.gameType === 'hockey-aire-online' && room.status === 'playing') {
-    tickAirHockey(room, now, delta)
-  }
-
   room.updatedAt = now
   await saveRoom(room)
   return room
@@ -667,9 +636,6 @@ export async function handleAction(
       break
     case 'mentiroso':
       handleMentirosoAction(room, userId, action)
-      break
-    case 'hockey-aire-online':
-      handleAirHockeyAction(room, userId, action)
       break
   }
 
@@ -897,200 +863,6 @@ function handleMentirosoAction(room: PartyRoomState, userId: string, action: Par
   throw createError({ statusCode: 400, statusMessage: 'Acción no válida en esta fase' })
 }
 
-function hockeyMatchPlayers(room: PartyRoomState): PartyPlayer[] {
-  return matchPlayers(room).slice(0, 2)
-}
-
-function hockeyPlayerSide(room: PartyRoomState, userId: string): 'bottom' | 'top' | null {
-  const players = hockeyMatchPlayers(room)
-  if (players[0]?.userId === userId) return 'bottom'
-  if (players[1]?.userId === userId) return 'top'
-  return null
-}
-
-function readAirHockeyState(room: PartyRoomState): AirHockeySimState {
-  const players = hockeyMatchPlayers(room)
-  return {
-    bottom: {
-      x: players[0]?.x ?? AH_FIELD_W / 2,
-      y: players[0]?.y ?? AH_FIELD_H - 110,
-      vx: players[0]?.vx ?? 0,
-      vy: players[0]?.vy ?? 0,
-    },
-    top: {
-      x: players[1]?.x ?? AH_FIELD_W / 2,
-      y: players[1]?.y ?? 110,
-      vx: players[1]?.vx ?? 0,
-      vy: players[1]?.vy ?? 0,
-    },
-    puck: {
-      x: room.puckX ?? AH_FIELD_W / 2,
-      y: room.puckY ?? AH_FIELD_H / 2,
-      vx: room.puckVx ?? 0,
-      vy: room.puckVy ?? 0,
-    },
-    stallSince: room.hockeyStallSince ?? null,
-  }
-}
-
-function writeAirHockeyState(room: PartyRoomState, state: AirHockeySimState) {
-  const players = hockeyMatchPlayers(room)
-  if (players[0]) {
-    players[0].x = state.bottom.x
-    players[0].y = state.bottom.y
-    players[0].vx = state.bottom.vx
-    players[0].vy = state.bottom.vy
-  }
-  if (players[1]) {
-    players[1].x = state.top.x
-    players[1].y = state.top.y
-    players[1].vx = state.top.vx
-    players[1].vy = state.top.vy
-  }
-  room.puckX = state.puck.x
-  room.puckY = state.puck.y
-  room.puckVx = state.puck.vx
-  room.puckVy = state.puck.vy
-  room.hockeyStallSince = state.stallSince
-}
-
-function startAirHockeyGame(room: PartyRoomState) {
-  const state = createInitialState()
-  room.hockeyScoreBottom = 0
-  room.hockeyScoreTop = 0
-  room.hockeyTargetScore = HOCKEY_DEFAULT_TARGET
-  room.goalPauseUntil = undefined
-  room.hockeyLastScorerId = undefined
-  room.phase = 'air_hockey_playing'
-  room.message = '¡A jugar! Mueve tu mazo para golpear el disco.'
-
-  const players = hockeyMatchPlayers(room)
-  players.forEach((player, index) => {
-    player.alive = true
-    player.points = 0
-    player.color = index === 0 ? '#ff4d94' : '#38e0e0'
-    if (index === 0) {
-      player.x = state.bottom.x
-      player.y = state.bottom.y
-    } else {
-      player.x = state.top.x
-      player.y = state.top.y
-    }
-    player.vx = 0
-    player.vy = 0
-  })
-
-  servePuck(state, Math.random() < 0.5 ? 'bottom' : 'top')
-  writeAirHockeyState(room, state)
-}
-
-function endAirHockeyGame(room: PartyRoomState, winner?: PartyPlayer) {
-  room.status = 'finished'
-  room.phase = 'finished'
-  room.winnerId = winner?.userId
-  room.winnerName = winner?.name
-  room.puckVx = 0
-  room.puckVy = 0
-  room.message = winner
-    ? `🏆 ¡${winner.name} gana ${room.hockeyScoreBottom ?? 0} - ${room.hockeyScoreTop ?? 0}!`
-    : 'Partida terminada.'
-}
-
-function registerAirHockeyGoal(room: PartyRoomState, goal: 'top' | 'bottom', now: number) {
-  const scorerSide = goalToScorer(goal)
-  const players = hockeyMatchPlayers(room)
-  const scorer = scorerSide === 'bottom' ? players[0] : players[1]
-
-  if (scorerSide === 'bottom') {
-    room.hockeyScoreBottom = (room.hockeyScoreBottom ?? 0) + 1
-  } else {
-    room.hockeyScoreTop = (room.hockeyScoreTop ?? 0) + 1
-  }
-
-  room.hockeyLastScorerId = scorer?.userId
-  room.puckVx = 0
-  room.puckVy = 0
-
-  const target = room.hockeyTargetScore ?? HOCKEY_DEFAULT_TARGET
-  if ((room.hockeyScoreBottom ?? 0) >= target || (room.hockeyScoreTop ?? 0) >= target) {
-    endAirHockeyGame(room, scorer)
-    return
-  }
-
-  room.phase = 'air_hockey_goal'
-  room.goalPauseUntil = now + AH_GOAL_PAUSE_MS
-  room.message = `¡Gol de ${scorer?.name ?? 'jugador'}!`
-}
-
-function tickAirHockey(room: PartyRoomState, now: number, delta: number) {
-  if (room.phase === 'air_hockey_goal') {
-    if (room.goalPauseUntil && now >= room.goalPauseUntil) {
-      const state = readAirHockeyState(room)
-      const lastScorer = room.hockeyLastScorerId
-      const players = hockeyMatchPlayers(room)
-      let serveTarget: 'bottom' | 'top' = 'bottom'
-      if (lastScorer === players[0]?.userId) serveTarget = 'top'
-      else if (lastScorer === players[1]?.userId) serveTarget = 'bottom'
-      servePuck(state, serveTarget)
-      writeAirHockeyState(room, state)
-      room.phase = 'air_hockey_playing'
-      room.goalPauseUntil = undefined
-      room.message = undefined
-    }
-    return
-  }
-
-  if (room.phase !== 'air_hockey_playing') return
-
-  const state = readAirHockeyState(room)
-  const stepMs = 16
-  let remaining = Math.min(delta, 200)
-  while (remaining > 0) {
-    const step = Math.min(remaining, stepMs)
-    const goal = simulateAirHockeyStep(state, step / 1000, now)
-    if (goal) {
-      writeAirHockeyState(room, state)
-      registerAirHockeyGoal(room, goal, now)
-      return
-    }
-    remaining -= step
-  }
-  writeAirHockeyState(room, state)
-}
-
-function handleAirHockeyAction(room: PartyRoomState, userId: string, action: PartyGameAction) {
-  if (room.phase !== 'air_hockey_playing' && room.phase !== 'air_hockey_goal') {
-    throw createError({ statusCode: 400, statusMessage: 'La partida no está activa' })
-  }
-
-  const player = room.players.find((p) => p.userId === userId)
-  if (!player) {
-    throw createError({ statusCode: 403, statusMessage: 'No estás en esta sala' })
-  }
-  assertNotWaiting(player)
-
-  if (action.type !== 'move_mallet') {
-    throw createError({ statusCode: 400, statusMessage: 'Acción no válida' })
-  }
-
-  const side = hockeyPlayerSide(room, userId)
-  if (!side) {
-    throw createError({ statusCode: 403, statusMessage: 'No participas en esta partida' })
-  }
-
-  const prevX = player.x
-  const prevY = player.y
-  const clamped = side === 'bottom'
-    ? clampBottomMallet(action.x, action.y)
-    : clampTopMallet(action.x, action.y)
-
-  const dt = 0.05
-  player.vx = (clamped.x - prevX) / dt
-  player.vy = (clamped.y - prevY) / dt
-  player.x = clamped.x
-  player.y = clamped.y
-}
-
 export function toRoomSummary(room: PartyRoomState, viewerId: string): PartyRoomSummary {
   const limits = getPlayerLimits(room.gameType)
   const playerCount = matchPlayers(room).length
@@ -1155,15 +927,6 @@ export function toRoomView(room: PartyRoomState, viewerId: string): PartyRoomVie
     mentirosoPrompt: room.mentirosoPrompt,
     mentirosoTotalRounds: room.mentirosoTotalRounds,
     chatMessages: room.chatMessages ?? [],
-    puckX: room.puckX,
-    puckY: room.puckY,
-    puckVx: room.puckVx,
-    puckVy: room.puckVy,
-    hockeyScoreBottom: room.hockeyScoreBottom,
-    hockeyScoreTop: room.hockeyScoreTop,
-    hockeyTargetScore: room.hockeyTargetScore,
-    goalPauseUntil: room.goalPauseUntil,
-    hockeyLastScorerId: room.hockeyLastScorerId,
     isInfiltrator,
     bombSecondsLeft,
     bombUrgent,

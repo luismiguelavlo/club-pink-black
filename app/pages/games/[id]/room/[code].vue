@@ -89,18 +89,6 @@ async function goBack() {
   navigateTo(`/games/${gameId}`)
 }
 
-watch(
-  () => [room.value?.status, room.value?.phase, gameId] as const,
-  ([status, phase, id]) => {
-    if (id === 'hockey-aire-online' && status === 'playing' && phase !== 'finished') {
-      startPolling(100)
-    }
-    else {
-      startPolling(1200)
-    }
-  },
-)
-
 onBeforeUnmount(() => {
   leaveRoom()
 })
@@ -234,12 +222,6 @@ onBeforeUnmount(() => {
 
         <MentirosoPanel
           v-else-if="gameId === 'mentiroso'"
-          :room="room"
-          @action="handleAction"
-        />
-
-        <AirHockeyOnlinePanel
-          v-else-if="gameId === 'hockey-aire-online'"
           :room="room"
           @action="handleAction"
         />
