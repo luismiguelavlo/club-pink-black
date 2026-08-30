@@ -1,4 +1,4 @@
-export type PartyGameId = 'infiltrado' | 'bomba' | 'no-piso' | 'mentiroso'
+export type PartyGameId = 'infiltrado' | 'bomba' | 'no-piso' | 'mentiroso' | 'hockey-aire-online'
 
 export type PartyRoomStatus = 'lobby' | 'playing' | 'finished'
 
@@ -15,6 +15,8 @@ export type PartyRoomPhase =
   | 'mentiroso_answer'
   | 'mentiroso_voting'
   | 'mentiroso_reveal'
+  | 'air_hockey_playing'
+  | 'air_hockey_goal'
   | 'finished'
 
 export interface PartyPlayer {
@@ -108,6 +110,17 @@ export interface PartyRoomState {
   mentirosoUsedQuestionIds?: string[]
   mentirosoTotalRounds?: number
   chatMessages?: PartyChatMessage[]
+  /** Air hockey online */
+  puckX?: number
+  puckY?: number
+  puckVx?: number
+  puckVy?: number
+  hockeyScoreBottom?: number
+  hockeyScoreTop?: number
+  hockeyTargetScore?: number
+  goalPauseUntil?: number
+  hockeyStallSince?: number | null
+  hockeyLastScorerId?: string
 }
 
 export type PartyRoomView = Omit<
@@ -154,3 +167,4 @@ export type PartyGameAction =
   | { type: 'jump' }
   | { type: 'submit_answer'; text: string }
   | { type: 'vote_answer'; optionId: string }
+  | { type: 'move_mallet'; x: number; y: number }

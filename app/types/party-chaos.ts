@@ -9,7 +9,7 @@ export type ChallengeCategory =
   | 'group'
   | 'betrayal'
 
-export type LocalGameId = 'reto-o-pierdes' | 'no-te-rias' | 'cerebro-grupo' | 'party-chaos'
+export type LocalGameId = 'reto-o-pierdes' | 'no-te-rias' | 'cerebro-grupo' | 'party-chaos' | 'ahorcado'
 
 export type NoTeRiasMode = 'normal' | 'silence' | 'character' | 'forbidden'
 

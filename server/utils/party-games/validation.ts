@@ -1,16 +1,18 @@
 import { z } from 'zod'
 
+const PARTY_GAME_TYPES = ['infiltrado', 'bomba', 'no-piso', 'mentiroso', 'hockey-aire-online'] as const
+
 export const createPartyRoomSchema = z.object({
-  gameType: z.enum(['infiltrado', 'bomba', 'no-piso', 'mentiroso']),
+  gameType: z.enum(PARTY_GAME_TYPES),
 })
 
 export const joinPartyRoomSchema = z.object({
   code: z.string().trim().min(4).max(8),
-  gameType: z.enum(['infiltrado', 'bomba', 'no-piso', 'mentiroso']).optional(),
+  gameType: z.enum(PARTY_GAME_TYPES).optional(),
 })
 
 export const listPartyRoomsSchema = z.object({
-  gameType: z.enum(['infiltrado', 'bomba', 'no-piso', 'mentiroso']).optional(),
+  gameType: z.enum(PARTY_GAME_TYPES).optional(),
 })
 
 export const partyChatMessageSchema = z.object({
@@ -52,5 +54,10 @@ export const partyGameActionSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('vote_answer'),
     optionId: z.string().trim().min(1),
+  }),
+  z.object({
+    type: z.literal('move_mallet'),
+    x: z.number().min(0).max(400),
+    y: z.number().min(0).max(700),
   }),
 ])

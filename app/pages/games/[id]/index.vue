@@ -178,9 +178,9 @@ const showMobileControls = computed(
           </div>
         </div>
 
-        <!-- Real-time local game: no player roster needed -->
+        <!-- Real-time local games: no player roster needed -->
         <div
-          v-if="gameId === 'hockey-aire'"
+          v-if="gameId === 'hockey-aire' || gameId === 'pong-battle'"
           class="mx-auto max-w-xl space-y-6"
         >
           <PartyGameGuide
@@ -189,7 +189,14 @@ const showMobileControls = computed(
             :emoji="game.emoji"
             :title="game.title"
           />
-          <AirHockeyGame @finish="goBack" />
+          <AirHockeyGame
+            v-if="gameId === 'hockey-aire'"
+            @finish="goBack"
+          />
+          <PongBattleGame
+            v-else-if="gameId === 'pong-battle'"
+            @finish="goBack"
+          />
         </div>
 
         <template v-else>
@@ -214,6 +221,10 @@ const showMobileControls = computed(
           />
           <PartyChaosMixed
             v-else-if="gameId === 'party-chaos'"
+            @finish="onLocalFinish"
+          />
+          <AhorcadoGame
+            v-else-if="gameId === 'ahorcado'"
             @finish="onLocalFinish"
           />
         </template>
